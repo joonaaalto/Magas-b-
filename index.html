@@ -9,15 +9,16 @@
 body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:linear-gradient(180deg,#eef2f7 0%,#dfe7f1 100%);
-    color:#333;
     margin:0;
     padding:10px;
-    min-height:100vh;
+    color:#333;
+    padding-bottom:80px; /* tilaa bottom barille */
 }
 
+/* HEADER */
 h1{
     text-align:center;
-    font-size:30px;
+    font-size:28px;
     font-weight:800;
     margin-bottom:5px;
     color:#1c2733;
@@ -25,23 +26,23 @@ h1{
 
 .subtitle{
     text-align:center;
-    color:#64748b;
     font-size:14px;
-    margin-bottom:5px;
+    color:#64748b;
 }
 
 #updated{
     text-align:center;
-    color:#64748b;
     font-size:12px;
-    margin-bottom:18px;
+    color:#64748b;
+    margin-bottom:15px;
 }
 
+/* NAPIT */
 .button-grid{
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:8px;
-    margin-bottom:18px;
+    margin-bottom:15px;
 }
 
 button{
@@ -49,46 +50,25 @@ button{
     color:white;
     border:none;
     padding:10px;
-    font-size:13px;
     font-weight:700;
     border-radius:12px;
     cursor:pointer;
     transition:.2s;
-    box-shadow:0 3px 8px rgba(0,0,0,.12);
 }
 
-button:hover{
-    transform:translateY(-2px);
-}
-
-button:active{
-    transform:scale(.97);
-}
+button:active{ transform:scale(.97); }
 
 .full-width{
     grid-column:span 2;
     background:linear-gradient(135deg,#ef4444,#dc2626);
 }
 
-/* KAUSINAPIT */
-.season-buttons{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:8px;
-    margin-bottom:10px;
-}
-
-.season-buttons button{
-    background:linear-gradient(135deg,#0ea5e9,#0284c7);
-}
-
+/* TAULUKKO */
 .table-container{
     background:white;
     border-radius:16px;
     overflow:hidden;
-    box-shadow:
-        0 8px 24px rgba(0,0,0,.08),
-        0 2px 6px rgba(0,0,0,.04);
+    box-shadow:0 8px 24px rgba(0,0,0,.08);
 }
 
 table{
@@ -100,29 +80,17 @@ table{
 th{
     background:#1e293b;
     color:white;
-    font-weight:700;
     padding:8px 5px;
     text-align:left;
 }
 
 td{
     padding:7px 5px;
-    border-bottom:1px solid #eceff3;
+    border-bottom:1px solid #eee;
 }
 
 tbody tr:nth-child(even){
     background:#f8fafc;
-}
-
-tbody tr:hover{
-    background:#eef6ff !important;
-}
-
-.loading{
-    text-align:center;
-    padding:20px;
-    font-weight:bold;
-    color:#666;
 }
 
 .highlight-column{
@@ -130,17 +98,46 @@ tbody tr:hover{
     font-weight:700;
 }
 
-th:first-child,
-td:first-child{
-    max-width:95px;
-    overflow:hidden;
-    text-overflow:ellipsis;
-    white-space:nowrap;
+.loading{
+    text-align:center;
+    padding:20px;
+    font-weight:bold;
 }
 
-@media (max-width:600px){
-    table{ font-size:11px; }
-    th, td{ padding:6px 3px; }
+/* =========================
+   🔽 BOTTOM SEASON BAR
+========================= */
+
+.bottom-bar{
+    position:fixed;
+    bottom:0;
+    left:0;
+    right:0;
+    background:#0f172a;
+    padding:10px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 -4px 15px rgba(0,0,0,.2);
+}
+
+.bottom-bar select{
+    padding:10px;
+    border-radius:10px;
+    border:none;
+    font-weight:700;
+    background:#1e293b;
+    color:white;
+    outline:none;
+}
+
+.bottom-bar button{
+    padding:10px 14px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#0ea5e9,#0284c7);
+    border:none;
+    font-weight:800;
 }
 </style>
 </head>
@@ -150,12 +147,6 @@ td:first-child{
 <h1>🏆 Pelaajatilastot</h1>
 <div class="subtitle">Google Sheets kausittain</div>
 <div id="updated"></div>
-
-<!-- KAUSIVALINTA -->
-<div class="season-buttons">
-    <button onclick="loadSheet(0)">🏆 Kausi 1</button>
-    <button onclick="loadSheet(123456789)">📅 Kausi 2</button>
-</div>
 
 <div class="button-grid">
     <button onclick="sortData(1,'desc')">Ottelut ↓</button>
@@ -179,7 +170,7 @@ td:first-child{
 </div>
 
 <div class="table-container">
-    <div id="loading" class="loading">Ladataan tilastoja...</div>
+    <div id="loading" class="loading">Ladataan...</div>
 
     <table id="statsTable" style="display:none;">
         <thead>
@@ -198,6 +189,16 @@ td:first-child{
     </table>
 </div>
 
+<!-- 🔽 BOTTOM SEASON SELECT -->
+<div class="bottom-bar">
+    <select id="seasonSelect" onchange="changeSeason()">
+        <option value="0">🏆 Kausi 1</option>
+        <option value="123456789">📅 Kausi 2</option>
+    </select>
+
+    <button onclick="reloadSeason()">Vaihda</button>
+</div>
+
 <script>
 
 const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
@@ -206,18 +207,16 @@ let tableData = [];
 let activeColumn = null;
 let currentGid = 0;
 
-document.getElementById("updated").textContent =
-    "Päivitetty: " + new Date().toLocaleString("fi-FI");
-
+/* LOAD SHEET */
 function loadSheet(gid){
 
     currentGid = gid;
 
-    document.getElementById('loading').style.display = 'block';
-    document.getElementById('statsTable').style.display = 'none';
+    document.getElementById('loading').style.display='block';
+    document.getElementById('statsTable').style.display='none';
 
-    const oldScript = document.getElementById('sheetScript');
-    if(oldScript) oldScript.remove();
+    const old = document.getElementById('sheetScript');
+    if(old) old.remove();
 
     const script = document.createElement('script');
     script.id = 'sheetScript';
@@ -228,45 +227,28 @@ function loadSheet(gid){
     document.body.appendChild(script);
 }
 
+/* CALLBACK */
 function koodiMestari(data){
 
-    try{
+    if(!data || !data.table) return;
 
-        if(!data || !data.table || !data.table.rows){
-            document.getElementById('loading').innerText =
-            'Virhe tiedon rakenteessa.';
-            return;
-        }
+    let rows = data.table.rows;
 
-        const rows = data.table.rows;
+    tableData = rows.map(r =>
+        r.c.map(c => c ? (c.f || c.v || '') : '')
+    );
 
-        let rawData = rows.map(row=>{
-            if(!row || !row.c) return [];
-
-            return row.c.map(cell=>{
-                if(!cell) return '';
-                return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
-            });
-
-        }).filter(row=>row.length>0);
-
-        if(rawData.length>0 &&
-           rawData[0][0].toString().toLowerCase().includes('pelaaja')){
-            rawData.shift();
-        }
-
-        tableData = rawData;
-
-        document.getElementById('loading').style.display='none';
-        document.getElementById('statsTable').style.display='table';
-
-        renderTable(tableData);
-
-    }catch(e){
-        console.error(e);
+    if(tableData.length && tableData[0][0].toLowerCase().includes('pelaaja')){
+        tableData.shift();
     }
+
+    document.getElementById('loading').style.display='none';
+    document.getElementById('statsTable').style.display='table';
+
+    renderTable(tableData);
 }
 
+/* RENDER */
 function renderTable(data){
 
     const tbody = document.getElementById('tableBody');
@@ -276,56 +258,47 @@ function renderTable(data){
 
         const tr = document.createElement('tr');
 
-        const name = row[0] || '';
-        const o = row[1] || '0';
-        const v = row[2] || '0';
-        const m = row[3] || '0';
-
-        let gpg = row[4] || '';
-        let vpct = row[5] || '';
-
-        const ga = row[6] || '0';
-        let gaa = row[7] || '';
-
-        if(gpg=='0' || gpg=='0.00') gpg='';
-        if(gaa=='0' || gaa=='0.00') gaa='';
-        if(vpct=='0' || vpct=='0%') vpct='';
-
         tr.innerHTML = `
-            <td class="${activeColumn===0?'highlight-column':''}"><b>${name}</b></td>
-            <td class="${activeColumn===1?'highlight-column':''}">${o}</td>
-            <td class="${activeColumn===2?'highlight-column':''}">${v}</td>
-            <td class="${activeColumn===3?'highlight-column':''}">${m}</td>
-            <td class="${activeColumn===4?'highlight-column':''}">${gpg}</td>
-            <td class="${activeColumn===5?'highlight-column':''}">${vpct}</td>
-            <td class="${activeColumn===6?'highlight-column':''}">${ga}</td>
-            <td class="${activeColumn===7?'highlight-column':''}">${gaa}</td>
+        <td class="${activeColumn===0?'highlight-column':''}"><b>${row[0]}</b></td>
+        <td class="${activeColumn===1?'highlight-column':''}">${row[1]}</td>
+        <td class="${activeColumn===2?'highlight-column':''}">${row[2]}</td>
+        <td class="${activeColumn===3?'highlight-column':''}">${row[3]}</td>
+        <td class="${activeColumn===4?'highlight-column':''}">${row[4]}</td>
+        <td class="${activeColumn===5?'highlight-column':''}">${row[5]}</td>
+        <td class="${activeColumn===6?'highlight-column':''}">${row[6]}</td>
+        <td class="${activeColumn===7?'highlight-column':''}">${row[7]}</td>
         `;
 
         tbody.appendChild(tr);
     });
 }
 
-function sortData(columnIndex,direction){
+/* SORT */
+function sortData(i,dir){
 
-    activeColumn = columnIndex;
+    activeColumn = i;
 
     tableData.sort((a,b)=>{
 
-        let valA=(a[columnIndex]||'0').toString();
-        let valB=(b[columnIndex]||'0').toString();
+        let A = parseFloat((a[i]||0).toString().replace(',','.'))||0;
+        let B = parseFloat((b[i]||0).toString().replace(',','.'))||0;
 
-        let numA=parseFloat(valA.replace(',','.').replace('%','')) || 0;
-        let numB=parseFloat(valB.replace(',','.').replace('%','')) || 0;
-
-        return direction==='asc'
-            ? (numA > numB ? 1 : -1)
-            : (numA < numB ? 1 : -1);
+        return dir==='asc' ? A-B : B-A;
     });
 
     renderTable(tableData);
 }
 
+/* SEASON CHANGE */
+function changeSeason(){
+    currentGid = document.getElementById('seasonSelect').value;
+}
+
+function reloadSeason(){
+    loadSheet(currentGid);
+}
+
+/* INIT */
 loadSheet(0);
 
 </script>
