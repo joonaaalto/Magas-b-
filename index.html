@@ -5,122 +5,26 @@ html<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pelaajatilastot</title>
     <style>
-        /* TÄSSÄ ON VAIN JA AINOASTAAN VISUAALINEN MUOTOILU */
-        :root {
-            --bg-color: #121824;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --primary: #3b82f6;
-            --danger: #ef4444;
-            --danger-hover: #dc2626;
-            --border: #334155;
-        }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
-            background-color: var(--bg-color); 
-            color: var(--text-main); 
-            margin: 0; 
-            padding: 10px; 
-            -webkit-font-smoothing: antialiased;
-        }
-        h1 { 
-            text-align: center; 
-            font-size: 26px; 
-            font-weight: 800;
-            margin: 15px 0 20px 0; 
-            color: var(--text-main);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-        }
-        .button-grid { 
-            display: grid; 
-            grid-template-columns: repeat(2, 1fr); 
-            gap: 6px; 
-            margin-bottom: 15px; 
-            background: var(--card-bg);
-            padding: 8px;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
-        }
-        button { 
-            background-color: #2e3b4e; 
-            color: var(--text-main); 
-            border: 1px solid var(--border); 
-            padding: 10px 6px; 
-            font-size: 13px; 
-            font-weight: 600; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            transition: all 0.15s ease;
-            -webkit-tap-highlight-color: transparent; 
-        }
-        button:active { 
-            background-color: var(--primary);
-            border-color: var(--primary);
-            transform: scale(0.98);
-        }
-        .full-width { 
-            grid-column: span 2; 
-            background-color: var(--danger); 
-            border-color: transparent;
-            font-size: 14px;
-            padding: 12px 6px;
-            margin-top: 4px;
-        }
-        .full-width:active { 
-            background-color: var(--danger-hover); 
-        }
-        .table-container { 
-            background: var(--card-bg); 
-            border-radius: 12px; 
-            overflow-x: auto; 
-            border: 1px solid var(--border);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
-            margin-bottom: 30px;
-        }
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            text-align: left; 
-            font-size: 14px; 
-        }
-        th, td { 
-            padding: 12px 14px; 
-            border-bottom: 1px solid var(--border); 
-            white-space: nowrap; 
-        }
-        th { 
-            background-color: #151f32; 
-            font-weight: 700; 
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 0.5px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-        tr:nth-child(even) {
-            background-color: #243046;
-        }
-        tr:last-child td { 
-            border-bottom: none; 
-        }
-        td b {
-            color: #fff;
-            font-size: 15px;
-        }
-        .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--text-muted); }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 10px; }
+        h1 { text-align: center; font-size: 24px; margin-bottom: 15px; color: #1a1a1a; }
+        .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
+        button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        button:active { background-color: #0056b3; }
+        /* Tehdään uudesta Päästetyt maalit -napista punainen ja koko näytön levyinen */
+        .full-width { grid-column: span 2; background-color: #dc3545; }
+        .full-width:active { background-color: #bd2130; }
+        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
+        th { background-color: #f8f9fa; font-weight: bold; color: #666; }
+        tr:last-child td { border-bottom: none; }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
 </head>
 <body>
 
     <h1>🏆 Pelaajatilastot</h1>
 
-    <!-- TÄSSÄ ON PÄIVITETYT PAINIKKEIDEN TEKSTIT -->
     <div class="button-grid">
         <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
         <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
@@ -132,6 +36,7 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
         <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
@@ -158,6 +63,7 @@ html<!DOCTYPE html>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
+        // Luetaan Google Sheetsin tarjoama JSONP-datavirta
         function koodiMestari(data) {
             try {
                 if (!data || !data.table || !data.table.rows) {
@@ -167,6 +73,7 @@ html<!DOCTYPE html>
 
                 const rows = data.table.rows;
                 
+                // Muunnetaan Googlen JSON-rakenne puhtaaksi taulukoksi
                 let rawData = rows.map(row => {
                     if (!row || !row.c) return [];
                     return row.c.map(cell => {
@@ -175,6 +82,7 @@ html<!DOCTYPE html>
                     });
                 }).filter(row => row.length > 0);
 
+                // Ohitetaan mahdollinen otsikkorivi
                 if (rawData.length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
                     rawData.shift();
                 }
@@ -196,8 +104,9 @@ html<!DOCTYPE html>
             }
         }
 
+        // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -216,6 +125,7 @@ html<!DOCTYPE html>
                 const ga = row[6] || '0';
                 let gaa = row[7] || '';
 
+                // Piilotetaan tyhjät tai nollakeskiarvot näkyvistä
                 if (gpg == '0' || gpg == '0.00') gpg = '';
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
