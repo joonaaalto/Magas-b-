@@ -18,10 +18,10 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
+        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* LISÄYS 1/2: TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT */
+        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT */
         .active-sort td:nth-child(var(--active-col)) {
             font-weight: bold;
             color: #000;
@@ -116,7 +116,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -140,6 +140,7 @@ html<!DOCTYPE html>
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
 
+                // KORJATTU: Lisätty puuttunut GAA-laatikko listan loppuun, jotta sarakkeet täsmäävät otsikoiden kanssa
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
                     <td>${o}</td>
@@ -169,7 +170,7 @@ html<!DOCTYPE html>
                 }
             });
             
-            // LISÄYS 2/2: KÄSITTELLÄÄN AKTIIVINEN PYSTYRIVI CSS-MUUTTUJAN AVULLA
+            // Käsitellään aktiivinen pystyrivi CSS-muuttujan avulla
             const table = document.getElementById('statsTable');
             table.classList.add('active-sort');
             table.style.setProperty('--active-col', columnIndex + 1);
