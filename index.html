@@ -13,169 +13,208 @@ html<!DOCTYPE html>
         /* Tehdään uudesta Päästetyt maalit -napista punainen ja koko näytön levyinen */
         .full-width { grid-column: span 2; background-color: #dc3545; }
         .full-width:active { background-color: #bd2130; }
-        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
+        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
+        /* TÄMÄ TYYLI VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
         .active-sort td:nth-child(var(--active-col)) {
+            background-color: #bae6fd !important;
             font-weight: bold;
             color: #000;
         }
         
         tr:last-child td { border-bottom: none; }
-        .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
+        
+        /* Hallintapaneelin tyylit */
+        .admin-section { display: none; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 20px; color: #333; }
+        .admin-row { display: grid; grid-template-columns: 2fr repeat(4, 1fr) auto; gap: 4px; margin-bottom: 8px; align-items: center; }
+        .admin-row input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fff; color: #333; }
+        .admin-header { font-weight: bold; font-size: 12px; color: #666; text-align: center; }
+        .admin-header:first-child { text-align: left; }
+        .admin-buttons { margin-top: 15px; display: flex; gap: 10px; }
+        .btn-sec { background-color: #6c757d; }
+        .btn-danger { background-color: #dc3545; padding: 6px 10px; font-size: 12px; }
+        .toggle-admin-btn { background-color: #28a745; margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; }
     </style>
 </head>
 <body>
 
-    <h1>🏆 Pelaajatilastot</h1>
+    <!-- YLEISÖNÄKYMÄ (TILASTOT) -->
+    <div id="publicView">
+        <h1>🏆 Pelaajatilastot</h1>
 
-    <div class="button-grid">
-        <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
-        <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
-        <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
-        <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
-        <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
-        <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
-        <button onclick="sortData(4, 'desc')">Paras GPG</button>
-        <button onclick="sortData(4, 'asc')">Pienin GPG</button>
-        <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
-        <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
-        <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
+        <div class="button-grid">
+            <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
+            <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
+            <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
+            <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
+            <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
+            <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
+            <button onclick="sortData(4, 'desc')">Paras GPG</button>
+            <button onclick="sortData(4, 'asc')">Pienin GPG</button>
+            <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
+            <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+            <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
+        </div>
+
+        <div class="table-container">
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th>Pelaaja</th>
+                        <th>O</th>
+                        <th>V</th>
+                        <th>M</th>
+                        <th>GPG</th>
+                        <th>V%</th>
+                        <th>GA</th>
+                        <th>GAA</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        
+        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja (Kännykällä)</button>
     </div>
 
-    <div class="table-container">
-        <div id="loading" class="loading">Ladataan tilastoja...</div>
-        <table id="statsTable" style="display:none;">
-            <thead>
-                <tr>
-                    <th>Pelaaja</th>
-                    <th>O</th>
-                    <th>V</th>
-                    <th>M</th>
-                    <th>GPG</th>
-                    <th>V%</th>
-                    <th>GA</th>
-                    <th>GAA</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody"></tbody>
-        </table>
+    <!-- HALLINTAPANEELI (SALAINEN) -->
+    <div id="adminView" class="admin-section">
+        <h2>🔒 Muokkaa pelaajia</h2>
+        <div class="admin-row">
+            <div class="admin-header">Nimi</div>
+            <div class="admin-header">O</div>
+            <div class="admin-header">V</div>
+            <div class="admin-header">M</div>
+            <div class="admin-header">GA</div>
+            <div></div>
+        </div>
+        <div id="adminRowsContainer"></div>
+        
+        <div class="admin-buttons">
+            <button onclick="addNewPlayerRow()" class="btn-sec">+ Lisää pelaaja</button>
+            <button onclick="saveDataToGitHub()">💾 Tallenna livenä</button>
+            <button onclick="closeAdmin()" class="btn-sec">Peruuta</button>
+        </div>
     </div>
 
     <script>
-        const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        let tableData = [];
+        const CONFIG = {
+            username: 'joonaaalto',
+            repo: 'tilastot',
+            token: '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',
+            salasana: '1234'
+        };
 
-        // Luetaan Google Sheetsin tarjoama JSONP-datavirta
-        function koodiMestari(data) {
-            try {
-                if (!data || !data.table || !data.table.rows) {
-                    document.getElementById('loading').innerText = 'Virhe tiedon rakenteessa. Varmista taulukko.';
-                    return;
-                }
+        // ALKUPERÄINEN DATALISTA (Tämä ylikirjoittuu automaattisesti aina kun tallennat hallintapaneelista)
+        let dataset = [
+            { nimi: "Matti Pelaaja", o: 10, v: 6, m: 12, ga: 4 },
+            { nimi: "Pekka Pelaaja", o: 8, v: 4, m: 5, ga: 9 }
+        ];
 
-                const rows = data.table.rows;
-                
-                // Muunnetaan Googlen JSON-rakenne puhtaaksi taulukoksi
-                let rawData = rows.map(row => {
-                    if (!row || !row.c) return [];
-                    return row.c.map(cell => {
-                        if (!cell) return '';
-                        return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
-                    });
-                }).filter(row => row.length > 0);
-
-                // Ohitetaan mahdollinen otsikkorivi
-                if (rawData.length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
-                    rawData.shift();
-                }
-
-                tableData = rawData;
-
-                if (tableData.length === 0) {
-                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt.';
-                    return;
-                }
-
-                document.getElementById('loading').style.display = 'none';
-                document.getElementById('statsTable').style.display = 'table';
-                
-                renderTable(tableData);
-            } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa.';
-                console.error(error);
-            }
+        function init() {
+            calculateAverages();
+            renderTable();
         }
 
-        // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
-        const script = document.createElement('script');
-        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
-        document.body.appendChild(script);
+        function calculateAverages() {
+            dataset.forEach(p => {
+                p.o = parseInt(p.o) || 0;
+                p.v = parseInt(p.v) || 0;
+                p.m = parseInt(p.m) || 0;
+                p.ga = parseInt(p.ga) || 0;
+                
+                p.gpg = p.o > 0 ? (p.m / p.o).toFixed(2) : '';
+                p.vPct = p.o > 0 ? ((p.v / p.o) * 100).toFixed(0) + '%' : '';
+                p.gaa = p.o > 0 ? (p.ga / p.o).toFixed(2) : '';
+                
+                if(p.gpg == '0' || p.gpg == '0.00') p.gpg = '';
+                if(p.gaa == '0' || p.gaa == '0.00') p.gaa = '';
+                if(p.vPct == '0%') p.vPct = '';
+            });
+        }
 
-        function renderTable(data) {
+        function renderTable() {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            
-            data.forEach(row => {
+            dataset.forEach(p => {
                 const tr = document.createElement('tr');
-                
-                const name = row[0] || '';
-                const o = row[1] || '0';
-                const v = row[2] || '0';
-                const m = row[3] || '0';
-                let gpg = row[4] || '';
-                let vPct = row[5] || '';
-                const ga = row[6] || '0';
-                let gaa = row[7] || '';
-
-                // Piilotetaan tyhjät tai nollakeskiarvot näkyvistä
-                if (gpg == '0' || gpg == '0.00') gpg = '';
-                if (gaa == '0' || gaa == '0.00') gaa = '';
-                if (vPct == '0' || vPct == '0%') vPct = '';
-
                 tr.innerHTML = `
-                    <td><b>${name}</b></td>
-                    <td>${o}</td>
-                    <td>${v}</td>
-                    <td>${m}</td>
-                    <td>${gpg}</td>
-                    <td>${vPct}</td>
-                    <td>${ga}</td>
-                    <td>${gaa}</td>
+                    <td><b>${p.nimi}</b></td>
+                    <td>${p.o}</td>
+                    <td>${p.v}</td>
+                    <td>${p.m}</td>
+                    <td>${p.gpg}</td>
+                    <td>${p.vPct}</td>
+                    <td>${p.ga}</td>
+                    <td>${p.gaa}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function sortData(columnIndex, direction) {
-            tableData.sort((a, b) => {
-                let valA = (a[columnIndex] || '0').toString();
-                let valB = (b[columnIndex] || '0').toString();
-
+        function sortData(col, dir) {
+            const keys = ['', 'o', 'v', 'm', 'gpg', 'vPct', 'ga', 'gaa'];
+            const key = keys[col];
+            
+            dataset.sort((a, b) => {
+                let valA = (a[key] || '0').toString();
+                let valB = (b[key] || '0').toString();
+                
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
-
-                if (direction === 'asc') {
-                    return numA > numB ? 1 : -1;
-                } else {
-                    return numA < numB ? 1 : -1;
-                }
+                
+                if (dir === 'asc') return numA > numB ? 1 : -1;
+                return numA < numB ? 1 : -1;
             });
             
-            // KYTKETÄÄN LIHAVOINTI PÄÄLLE VALITULLE SARAKKEELLE
             const table = document.getElementById('statsTable');
             table.classList.add('active-sort');
-            table.style.setProperty('--active-col', columnIndex + 1);
-            
-            renderTable(tableData);
+            table.style.setProperty('--active-col', col + 1);
+            renderTable();
         }
-    </script>
-</body>
-</html>
+
+        // --- HALLINTAPANEELIN TOIMINNOT ---
+        function openAdmin() {
+            const syote = prompt("Syötä salasanasi:");
+            if (syote === CONFIG.salasana) {
+                document.getElementById('publicView').style.display = 'none';
+                document.getElementById('adminView').style.display = 'block';
+                buildAdminRows();
+            } else if (syote !== null) {
+                alert("Väärä salasana!");
+            }
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminView').style.display = 'none';
+            document.getElementById('publicView').style.display = 'block';
+        }
+
+        function buildAdminRows() {
+            const container = document.getElementById('adminRowsContainer');
+            container.innerHTML = '';
+            dataset.forEach((p, idx) => {
+                const div = document.createElement('div');
+                div.className = 'admin-row';
+                div.innerHTML = `
+                    <input type="text" value="${p.nimi}" data-field="nimi" data-idx="${idx}">
+                    <input type="number" value="${p.o}" data-field="o" data-idx="${idx}">
+                    <input type="number" value="${p.v}" data-field="v" data-idx="${idx}">
+                    <input type="number" value="${p.m}" data-field="m" data-idx="${idx}">
+                    <input type="number" value="${p.ga}" data-field="ga" data-idx="${idx}">
+                    <button class="btn-danger" onclick="deletePlayerRow(${idx})">X</button>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function addNewPlayerRow() {
+            dataset.push({ nimi: "Uusi Pelaaja", o: 0, v: 0, m: 0, ga: 0 });
+            buildAdminRows();
+        }
