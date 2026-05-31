@@ -62,7 +62,7 @@ html<!DOCTYPE html>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
-        // Luetaan Google Sheetsin tarjoama JSONP-datavirta ilman kirjoitusvirheitä
+        // Luetaan Google Sheetsin tarjoama JSONP-datavirta
         function koodiMestari(data) {
             try {
                 if (!data || !data.table || !data.table.rows) {
@@ -71,13 +71,22 @@ html<!DOCTYPE html>
                 }
 
                 const rows = data.table.rows;
-                tableData = rows.map(row => {
+                
+                // Muunnetaan Googlen JSON-rakenne puhtaaksi taulukoksi
+                let rawData = rows.map(row => {
                     if (!row || !row.c) return [];
                     return row.c.map(cell => {
                         if (!cell) return '';
                         return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
                     });
-                }).filter(row => row.length > 0 && row[0] !== ''); // Siivotaan tyhjät rivit
+                }).filter(row => row.length > 0 && row[0] !== '');
+
+                // Ohitetaan mahdollinen otsikkorivi, jos ensimmäisessä solussa lukee "Pelaaja"
+                if (rawData.length > 0 && rawData[0][0].toString().toLowerCase() === 'pelaaja') {
+                    rawData.shift();
+                }
+
+                tableData = rawData;
 
                 if (tableData.length === 0) {
                     document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt.';
@@ -106,7 +115,6 @@ html<!DOCTYPE html>
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                // Haetaan arvot turvallisesti
                 const name = row[0] || '';
                 const o = row[1] || '0';
                 const v = row[2] || '0';
