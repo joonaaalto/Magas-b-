@@ -73,21 +73,23 @@
                 const lines = csvText.split('\n');
                 tableData = [];
 
-                // Aloitetaan riviltä 2 (i = 1), jotta otsikkorivi hypätään yli
+                // Aloitetaan riviltä 2 (i = 1), eli ohitetaan otsikot
                 for (let i = 1; i < lines.length; i++) {
-                    if (!lines[i].trim()) continue;
+                    let currentLine = lines[i].trim();
+                    if (!currentLine) continue;
                     
-                    // Suomalainen Sheets käyttää puolipistettä (;) sarakkeiden erottamiseen
-                    const row = lines[i].split(';').map(cell => cell.replace(/^"|"$/g, '').trim());
+                    // Tunnistetaan automaattisesti käytetäänkö puolipistettä vai pilkkua erottimena
+                    let separator = currentLine.includes(';') ? ';' : ',';
+                    let row = currentLine.split(separator).map(cell => cell.replace(/^"|"$/g, '').trim());
                     
-                    // Otetaan mukaan vain ne rivit, joissa on pelaajan nimi
-                    if (row && row[0] !== '') {
+                    // Varmistetaan että rivillä on nimitieto (sarake A ei ole tyhjä), eikä se ole tyhjä erotinrivi
+                    if (row && row[0] && row[0] !== "" && !row[0].startsWith(',')) {
                         tableData.push(row);
                     }
                 }
 
                 if (tableData.length === 0) {
-                    document.getElementById('loading').innerText = 'Taulukko on tyhjä tai sitä ei voitu lukea.';
+                    document.getElementById('loading').innerText = 'Taulukko luettiin, mutta pelaajatietoja ei löytynyt. Varmista Sheets-välilehti.';
                     return;
                 }
 
@@ -108,7 +110,7 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                // Haetaan solut järjestyksessä A-H
+                // Haetaan arvot ja asetetaan varalle tyhjä merkkijono jos saraketta ei ole
                 const name = row[0] || '';
                 const o = row[1] || '0';
                 const v = row[2] || '0';
@@ -137,7 +139,6 @@
                 let valA = a[columnIndex] || '0';
                 let valB = b[columnIndex] || '0';
 
-                // Muutetaan suomalaiset pilkkudesimaalit ja prosentit numeroiksi
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
 
