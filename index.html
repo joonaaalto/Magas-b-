@@ -10,6 +10,9 @@ html<!DOCTYPE html>
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         button:active { background-color: #0056b3; }
+        /* Tehdään uudesta Päästetyt maalit -napista punainen ja koko näytön levyinen */
+        .full-width { grid-column: span 2; background-color: #dc3545; }
+        .full-width:active { background-color: #bd2130; }
         .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
@@ -33,10 +36,8 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-        <button onclick="sortData(6, 'desc')">Eniten GA</button>
-        <button onclick="sortData(6, 'asc')">Vähiten GA</button>
-        <button onclick="sortData(7, 'desc')">Suurin GAA</button>
-        <button onclick="sortData(7, 'asc')">Pienin GAA</button>
+        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
+        <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
     <div class="table-container">
