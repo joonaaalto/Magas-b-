@@ -18,7 +18,7 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* TÄMÄ UUSI RIVI VAIHTAA JOKA TOISEN RIVIN VÄRIN VAALEAN HARMAAKSI */
+        /* TÄMÄ ON SE AINOA LISÄTTY RIVI JOKA TEKEE RAITA-VÄRITYKSEN */
         tr:nth-child(even) { background-color: #f1f5f9; }
         
         tr:last-child td { border-bottom: none; }
@@ -40,6 +40,7 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
         <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
