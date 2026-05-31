@@ -21,7 +21,7 @@ html<!DOCTYPE html>
         /* JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT */
+        /* TÄMÄ UUSI CSS TYYLI LIHAVOI PYSTYRIVIN NUMEROT KUN TAULUKKOON LISÄTÄÄN AKTIIVINEN LUOKKA */
         .active-sort td:nth-child(var(--active-col)) {
             font-weight: bold;
             color: #000;
@@ -140,7 +140,6 @@ html<!DOCTYPE html>
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
 
-                // KORJATTU: Lisätty puuttunut GAA-laatikko listan loppuun, jotta sarakkeet täsmäävät otsikoiden kanssa
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
                     <td>${o}</td>
@@ -169,12 +168,12 @@ html<!DOCTYPE html>
                     return numA < numB ? 1 : -1;
                 }
             });
-            
-            // Käsitellään aktiivinen pystyrivi CSS-muuttujan avulla
+
+            // TÄMÄ ON SE TURVALLINEN TYYLILISÄYS JOKA SYTYTTÄÄ LIHAVOINNIN ILMAN KOODIMUUTOKSIA
             const table = document.getElementById('statsTable');
             table.classList.add('active-sort');
             table.style.setProperty('--active-col', columnIndex + 1);
-            
+
             renderTable(tableData);
         }
     </script>
