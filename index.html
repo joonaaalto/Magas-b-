@@ -79,10 +79,10 @@ html<!DOCTYPE html>
                         if (!cell) return '';
                         return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
                     });
-                }).filter(row => row.length > 0 && row[0] !== '');
+                }).filter(row => row.length > 0);
 
-                // Ohitetaan mahdollinen otsikkorivi, jos ensimmäisessä solussa lukee "Pelaaja"
-                if (rawData.length > 0 && rawData[0][0].toString().toLowerCase() === 'pelaaja') {
+                // Ohitetaan mahdollinen otsikkorivi
+                if (rawData.length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
                     rawData.shift();
                 }
 
@@ -105,7 +105,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
