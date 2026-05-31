@@ -35,7 +35,6 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-        <!-- Tässä on se uusi iso painike, ja muut GA/GAA napat on poistettu -->
         <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
@@ -74,22 +73,19 @@ html<!DOCTYPE html>
                 const lines = cleanText.split('\n');
                 tableData = [];
 
-                // Aloitetaan riviltä 2 (i = 1), eli ohitetaan otsikot
                 for (let i = 1; i < lines.length; i++) {
                     let currentLine = lines[i].trim();
                     if (!currentLine) continue;
                     
-                    // Suomalainen Sheets käyttää puolipistettä sarakkeiden erottamiseen
                     const row = currentLine.split(';').map(cell => cell.replace(/^"|"$/g, '').trim());
                     
-                    // Otetaan mukaan vain rivit, joissa on jotain tietoa
                     if (row && row[0] !== '') {
                         tableData.push(row);
                     }
                 }
 
                 if (tableData.length === 0) {
-                    document.getElementById('loading').innerText = 'Taulukko luettiin, mutta pelaajatietoja ei löytynyt.';
+                    document.getElementById('loading').innerText = 'Taulukko luettiin, mutta tietoja osunut.';
                     return;
                 }
 
