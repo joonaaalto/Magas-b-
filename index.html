@@ -18,14 +18,8 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
+        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
-        
-        /* TÄMÄ UUSI TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT AUTOMAATTISESTI */
-        .active-sort td:nth-child(var(--active-col)) {
-            font-weight: bold;
-            color: #000;
-        }
         
         tr:last-child td { border-bottom: none; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
@@ -70,7 +64,6 @@ html<!DOCTYPE html>
     </div>
 
     <script>
-        // TÄSTÄ ALASPÄIN KOODI ON 100 % SINUN TOIMIVA ALKUPERÄINEN KOODISI
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
@@ -117,7 +110,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -169,12 +162,6 @@ html<!DOCTYPE html>
                     return numA < numB ? 1 : -1;
                 }
             });
-
-            // AKTIVOIDAAN LIHAVOINTI CSS-MUUTTUJAN AVULLA (Ei riko koodia)
-            const table = document.getElementById('statsTable');
-            table.classList.add('active-sort');
-            table.style.setProperty('--active-col', columnIndex + 1);
-
             renderTable(tableData);
         }
     </script>
