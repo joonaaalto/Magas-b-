@@ -57,7 +57,7 @@ html<!DOCTYPE html>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja (Kännykällä)</button>
+        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja (Yhteisellä salasanalla)</button>
     </div>
 
     <div id="adminView" class="admin-section">
@@ -74,13 +74,9 @@ html<!DOCTYPE html>
     </div>
 
     <script>
-        const CONFIG = {
-            username: 'joonaaalto',
-            repo: 'tilastot',
-            token1: 'ghp_yUOWdkpKSLGFlE9ChSAdEkI',
-            token2: 'IO9jWK83hFuLC',
-            salasana: '1234'
-        };
+        const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
+        let tableData = [];
+        let userPassword = ''; // Pidetään syötetty salasana tallessa muistissa
 
         let dataset = [
             { nimi: "Matti Pelaaja", o: 10, v: 6, m: 12, ga: 4 },
@@ -122,12 +118,13 @@ html<!DOCTYPE html>
         }
 
         function openAdmin() {
-            const syote = prompt("Syötä salasanasi:");
-            if (syote === CONFIG.salasana) {
+            const syote = prompt("Syötä jaettava salasana:");
+            if (syote) {
+                userPassword = syote.trim();
                 document.getElementById('publicView').style.display = 'none';
                 document.getElementById('adminView').style.display = 'block';
                 buildAdminRows();
-            } else if (syote !== null) { alert("Väärä salasana!"); }
+            }
         }
 
         function closeAdmin() { document.getElementById('adminView').style.display = 'none'; document.getElementById('publicView').style.display = 'block'; }
@@ -148,12 +145,29 @@ html<!DOCTYPE html>
             const inputs = document.querySelectorAll('#adminRowsContainer input');
             inputs.forEach(input => { dataset[input.getAttribute('data-idx')][input.getAttribute('data-field')] = input.value; });
             calculateAverages();
-            const button = document.querySelector('#adminView button:nth-child(2)'); button.innerText = "⏳ Tallennetaan..."; button.disabled = true;
-            const fullToken = CONFIG.token1 + CONFIG.token2;
+            
+            const button = document.querySelector('#adminView button:nth-child(2)'); 
+            button.innerText = "⏳ Tallennetaan..."; 
+            button.disabled = true;
+            
             try {
-                const fileUrl = `https://github.com{CONFIG.username}/${CONFIG.repo}/contents/index.html`;
-                const getRes = await fetch(fileUrl, { headers: { 'Authorization': `token ${fullToken}` } });
-                const getData = await getRes.json(); const sha = getData.sha;
-                let fullHtml = document.documentElement.outerHTML; fullHtml = '<!DOCTYPE html>\n<html>' + fullHtml + '</html>';
-                const cleanData = dataset.map(p => ({ nimi: p.nimi, o: parseInt(p.o), v: parseInt(p.v), m: parseInt(p.m), ga: parseInt(p.ga) }));
-                fullHtml = fullHtml.replace(/let dataset = \[\s*[\s\S]*?\s*\];/,
+                // Kutsutaan suojattua Vercel-taustajärjestelmää, joka hoitaa tallennuksen turvallisesti
+                const response = await fetch('/api/save', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ password: userPassword, dataset: dataset })
+                });
+                
+                const resData = await response.json();
+                
+                if (response.ok) {
+                    alert("🎉 Tilastot tallennettu! Sivu päivittyy kaikille noin minuutissa.");
+                    location.reload();
+                } else {
+                    alert("Virhe: " + (resData.error || 'Tuntematon virhe salasanassa.'));
+                    button.innerText = "💾 Tallenna livenä";
+                    button.disabled = false;
+                }
+            } catch (err) {
+                alert("Yhteysvirhe palvelimeen.");
+                button.innerText = "💾 Tallenna livenä";
