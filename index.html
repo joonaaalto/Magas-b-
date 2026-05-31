@@ -10,213 +10,172 @@ html<!DOCTYPE html>
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         button:active { background-color: #0056b3; }
+        /* Tehdään uudesta Päästetyt maalit -napista punainen ja koko näytön levyinen */
         .full-width { grid-column: span 2; background-color: #dc3545; }
         .full-width:active { background-color: #bd2130; }
-        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
+        
+        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* VALITTU PYSTYRIVI SAA VAALEANSINISEN TAUSTAN JA LIHAVOINNIN */
-        .active-sort td:nth-child(var(--active-col)) { background-color: #e0f2fe !important; font-weight: bold; color: #000; }
-        tr:last-child td { border-bottom: none; }
+        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
+        .active-sort td:nth-child(var(--active-col)) {
+            font-weight: bold;
+            color: #000;
+        }
         
-        /* Hallintapaneelin vapaat tyylit */
-        .admin-section { display: none; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 20px; color: #333; }
-        .admin-row { display: grid; grid-template-columns: 2fr repeat(4, 1fr) auto; gap: 4px; margin-bottom: 8px; align-items: center; }
-        .admin-row input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fff; color: #333; }
-        .admin-header { font-weight: bold; font-size: 12px; color: #666; text-align: center; }
-        .admin-header:first-child { text-align: left; }
-        .admin-buttons { margin-top: 15px; display: flex; gap: 10px; }
-        .btn-sec { background-color: #6c757d; }
-        .btn-danger { background-color: #dc3545; padding: 6px 10px; font-size: 12px; }
-        .toggle-admin-btn { background-color: #28a745; margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; }
+        tr:last-child td { border-bottom: none; }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
 </head>
 <body>
 
-    <div id="publicView">
-        <h1>🏆 Pelaajatilastot</h1>
-        <div class="button-grid">
-            <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
-            <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
-            <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
-            <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
-            <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
-            <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
-            <button onclick="sortData(4, 'desc')">Paras GPG</button>
-            <button onclick="sortData(4, 'asc')">Pienin GPG</button>
-            <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
-            <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-            <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
-        </div>
-        <div class="table-container">
-            <table id="statsTable">
-                <thead>
-                    <tr>
-                        <th>Pelaaja</th><th>O</th><th>V</th><th>M</th><th>GPG</th><th>V%</th><th>GA</th><th>GAA</th>
-                    </tr>
-                </thead>
-                <tbody id="tableBody"></tbody>
-            </table>
-        </div>
-        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja suoraan tässä</button>
+    <h1>🏆 Pelaajatilastot</h1>
+
+    <div class="button-grid">
+        <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
+        <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
+        <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
+        <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
+        <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
+        <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
+        <button onclick="sortData(4, 'desc')">Paras GPG</button>
+        <button onclick="sortData(4, 'asc')">Pienin GPG</button>
+        <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
+        <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
+        <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
-    <div id="adminView" class="admin-section">
-        <h2>📝 Hallintapaneeli</h2>
-        <div class="admin-row">
-            <div class="admin-header">Nimi</div><div class="admin-header">O</div><div class="admin-header">V</div><div class="admin-header">M</div><div class="admin-header">GA</div><div></div>
-        </div>
-        <div id="adminRowsContainer"></div>
-        <div class="admin-buttons">
-            <button onclick="addNewPlayerRow()" class="btn-sec">+ Lisää pelaaja</button>
-            <button onclick="saveDataLocally()">💾 Tallenna muutokset puhelimeen</button>
-            <button onclick="closeAdmin()" class="btn-sec">Peruuta</button>
-        </div>
+    <div class="table-container">
+        <div id="loading" class="loading">Ladataan tilastoja...</div>
+        <table id="statsTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Pelaaja</th>
+                    <th>O</th>
+                    <th>V</th>
+                    <th>M</th>
+                    <th>GPG</th>
+                    <th>V%</th>
+                    <th>GA</th>
+                    <th>GAA</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
     </div>
 
     <script>
-        let dataset = [];
-         // Ladataan esimerkkidata tai puhelimen muistiin tallennetut pelaajat
-        const defaultData = [
-            { nimi: "Matti Pelaaja", o: 10, v: 6, m: 12, ga: 4 },
-            { nimi: "Pekka Pelaaja", o: 8, v: 4, m: 5, ga: 9 }
-        ];
+        const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
+        let tableData = [];
 
-        function init() {
-            const savedData = localStorage.getItem('oma_pelaajadata');
-            if (savedData) {
-                dataset = JSON.parse(savedData);
-            } else {
-                dataset = defaultData;
-            }
-            calculateAverages();
-            renderTable();
-        }
+        // Luetaan Google Sheetsin tarjoama JSONP-datavirta
+        function koodiMestari(data) {
+            try {
+                if (!data || !data.table || !data.table.rows) {
+                    document.getElementById('loading').innerText = 'Virhe tiedon rakenteessa. Varmista taulukko.';
+                    return;
+                }
 
-        function calculateAverages() {
-            dataset.forEach(p => {
-                p.o = parseInt(p.o) || 0;
-                p.v = parseInt(p.v) || 0;
-                p.m = parseInt(p.m) || 0;
-                p.ga = parseInt(p.ga) || 0;
+                const rows = data.table.rows;
                 
-                p.gpg = p.o > 0 ? (p.m / p.o).toFixed(2) : '0.00';
-                p.vPct = p.o > 0 ? Math.round((p.v / p.o) * 100) + '%' : '0%';
-                p.gaa = p.o > 0 ? (p.ga / p.o).toFixed(2) : '0.00';
-            });
+                // Muunnetaan Googlen JSON-rakenne puhtaaksi taulukoksi
+                let rawData = rows.map(row => {
+                    if (!row || !row.c) return [];
+                    return row.c.map(cell => {
+                        if (!cell) return '';
+                        return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
+                    });
+                }).filter(row => row.length > 0);
+
+                // Ohitetaan mahdollinen otsikkorivi
+                if (rawData.length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
+                    rawData.shift();
+                }
+
+                tableData = rawData;
+
+                if (tableData.length === 0) {
+                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt.';
+                    return;
+                }
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('statsTable').style.display = 'table';
+                
+                renderTable(tableData);
+            } catch (error) {
+                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa.';
+                console.error(error);
+            }
         }
 
-        function renderTable() {
+        // Luetaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
+        const script = document.createElement('script');
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        document.body.appendChild(script);
+
+        function renderTable(data) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
-            dataset.forEach(p => {
+            
+            data.forEach(row => {
                 const tr = document.createElement('tr');
+                
+                const name = row[0] || '';
+                const o = row[1] || '0';
+                const v = row[2] || '0';
+                const m = row[3] || '0';
+                let gpg = row[4] || '';
+                let vPct = row[5] || '';
+                const ga = row[6] || '0';
+                let gaa = row[7] || '';
+
+                // Piilotetaan tyhjät tai nollakeskiarvot näkyvistä
+                if (gpg == '0' || gpg == '0.00') gpg = '';
+                if (gaa == '0' || gaa == '0.00') gaa = '';
+                if (vPct == '0' || vPct == '0%') vPct = '';
+
                 tr.innerHTML = `
-                    <td><b>${p.nimi}</b></td>
-                    <td>${p.o}</td>
-                    <td>${p.v}</td>
-                    <td>${p.m}</td>
-                    <td>${p.gpg !== '0.00' ? p.gpg : ''}</td>
-                    <td>${p.vPct !== '0%' ? p.vPct : ''}</td>
-                    <td>${p.ga}</td>
-                    <td>${p.gaa !== '0.00' ? p.gaa : ''}</td>
+                    <td><b>${name}</b></td>
+                    <td>${o}</td>
+                    <td>${v}</td>
+                    <td>${m}</td>
+                    <td>${gpg}</td>
+                    <td>${vPct}</td>
+                    <td>${ga}</td>
+                    <td>${gaa}</td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function sortData(col, dir) {
-            const keys = ['', 'o', 'v', 'm', 'gpg', 'vPct', 'ga', 'gaa'];
-            const key = keys[col];
-            
-            dataset.sort((a, b) => {
-                let valA = a[key];
-                let valB = b[key];
-                
-                if (key === 'vPct') {
-                    valA = parseInt(valA) || 0;
-                    valB = parseInt(valB) || 0;
-                } else if (key !== 'nimi') {
-                    valA = parseFloat(valA) || 0;
-                    valB = parseFloat(valB) || 0;
+        function sortData(columnIndex, direction) {
+            tableData.sort((a, b) => {
+                let valA = (a[columnIndex] || '0').toString();
+                let valB = (b[columnIndex] || '0').toString();
+
+                let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
+                let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
+
+                if (direction === 'asc') {
+                    return numA > numB ? 1 : -1;
+                } else {
+                    return numA < numB ? 1 : -1;
                 }
-                
-                if (dir === 'asc') return valA > valB ? 1 : -1;
-                return valA < valB ? 1 : -1;
             });
             
+            // KYTKETÄÄN LIHAVOINTI PÄÄLLE VALITULLE SARAKKEELLE
             const table = document.getElementById('statsTable');
             table.classList.add('active-sort');
-            table.style.setProperty('--active-col', col + 1);
-            renderTable();
-        }
-
-        function openAdmin() {
-            document.getElementById('publicView').style.display = 'none';
-            document.getElementById('adminView').style.display = 'block';
-            buildAdminRows();
-        }
-
-        function closeAdmin() {
-            document.getElementById('adminView').style.display = 'none';
-            document.getElementById('publicView').style.display = 'block';
-        }
-
-        function buildAdminRows() {
-            const container = document.getElementById('adminRowsContainer');
-            container.innerHTML = '';
-            dataset.forEach((p, idx) => {
-                const div = document.createElement('div');
-                div.className = 'admin-row';
-                div.innerHTML = `
-                    <input type="text" value="${p.nimi}" data-field="nimi" data-idx="${idx}">
-                    <input type="number" value="${p.o}" data-field="o" data-idx="${idx}">
-                    <input type="number" value="${p.v}" data-field="v" data-idx="${idx}">
-                    <input type="number" value="${p.m}" data-field="m" data-idx="${idx}">
-                    <input type="number" value="${p.ga}" data-field="ga" data-idx="${idx}">
-                    <button class="btn-danger" onclick="deletePlayerRow(${idx})">X</button>
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function addNewPlayerRow() {
-            dataset.push({ nimi: "Uusi Pelaaja", o: 0, v: 0, m: 0, ga: 0 });
-            buildAdminRows();
-        }
-
-        function deletePlayerRow(idx) {
-            dataset.splice(idx, 1);
-            buildAdminRows();
-        }
-
-        function saveDataLocally() {
-            const rows = document.querySelectorAll('#adminRowsContainer .admin-row');
-            rows.forEach(row => {
-                const nameInput = row.querySelector('[data-field="nimi"]');
-                const idx = nameInput.getAttribute('data-idx');
-                
-                dataset[idx].nimi = nameInput.value;
-                dataset[idx].o = parseInt(row.querySelector('[data-field="o"]').value) || 0;
-                dataset[idx].v = parseInt(row.querySelector('[data-field="v"]').value) || 0;
-                dataset[idx].m = parseInt(row.querySelector('[data-field="m"]').value) || 0;
-                dataset[idx].ga = parseInt(row.querySelector('[data-field="ga"]').value) || 0;
-            });
-
-            calculateAverages();
+            table.style.setProperty('--active-col', columnIndex + 1);
             
-            // Tallennetaan puhtasti puhelimen selausmuistiin livenä ilman koodeja tai salasanoja
-            localStorage.setItem('oma_pelaajadata', JSON.stringify(dataset));
-            
-            alert("🎉 Tilastot tallennettu onnistuneesti puhelimesi muistiin!");
-            closeAdmin();
-            renderTable();
+            renderTable(tableData);
         }
-
-        window.onload = init;
     </script>
 </body>
 </html>
