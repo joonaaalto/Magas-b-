@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelaajatilastot</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 10px; }
+        h1 { text-align: center; font-size: 24px; margin-bottom: 15px; color: #1a1a1a; }
+        .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
+        button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        button:active { background-color: #0056b3; }
+        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
+        th { background-color: #f8f9fa; font-weight: bold; color: #666; }
+        tr:last-child td { border-bottom: none; }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
+    </style>
+</head>
+<body>
+
+    <h1>🏆 Pelaajatilastot</h1>
+
+    <!-- Napit jotka toimivat kännykällä yhdellä klikkauksella -->
+    <div class="button-grid">
+        <button onclick="sortData(1, 'desc')">Ottelut (Isot ensin)</button>
+        <button onclick="sortData(1, 'asc')">Ottelut (Pienet ensin)</button>
+        <button onclick="sortData(2, 'desc')">Voitot (Isot ensin)</button>
+        <button onclick="sortData(2, 'asc')">Voitot (Pienet ensin)</button>
+        <button onclick="sortData(3, 'desc')">Maalit (Isot ensin)</button>
+        <button onclick="sortData(3, 'asc')">Maalit (Pienet ensin)</button>
+        <button onclick="sortData(4, 'desc')">Paras GPG</button>
+        <button onclick="sortData(4, 'asc')">Pienin GPG</button>
+        <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
+        <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <button onclick="sortData(6, 'desc')">Eniten GA</button>
+        <button onclick="sortData(6, 'asc')">Vähiten GA</button>
+        <button onclick="sortData(7, 'desc')">Suurin GAA</button>
+        <button onclick="sortData(7, 'asc')">Pienin GAA</button>
+    </div>
+
+    <div class="table-container">
+        <div id="loading" class="loading">Ladataan tilastoja...</div>
+        <table id="statsTable" style="display:none;">
+            <thead>
+                <tr>
+                    <th>Pelaaja</th>
+                    <th>O</th>
+                    <th>V</th>
+                    <th>M</th>
+                    <th>GPG</th>
+                    <th>V%</th>
+                    <th>GA</th>
+                    <th>GAA</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <script>
+        // Sinun oma Google Sheets ID syötettynä suoraan tähän koodiin
+        const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
+        const url = `https://google.com{sheetId}/gviz/tq?tqx=out:json`;
+
+        let tableData = [];
+
+        async function loadStats() {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                // Puhdistetaan Googlen palauttama JSON-muoto koodille luettavaksi
+                const jsonText = text.substring(text.indexOf("(") + 1, text.lastIndexOf(")"));
+                const data = JSON.parse(jsonText);
+                
+                const rows = data.table.rows;
+                tableData = rows.map(row => row.c.map(cell => cell ? cell.v : ''));
+
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('statsTable').style.display = 'table';
+                
+                renderTable(tableData);
+            } catch (error) {
+                document.getElementById('loading').innerText = 'Virhe ladattaessa tietoja. Varmista, että Sheets on julkaistu verkkoon.';
+                console.error(error);
+            }
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+            
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                
+                // Haetaan solut sarakkeittain A-H (indeksit 0-7)
+                const name = row[0] || '';
+                const o = row[1] !== '' ? row[1] : '';
+                const v = row[2] !== '' ? row[2] : '';
+                const m = row[3] !== '' ? row[3] : '';
+                const gpg = row[4] !== '' ? (typeof row[4] === 'number' ? row[4].toFixed(2) : row[4]) : '';
+                const vPct = row[5] !== '' ? (typeof row[5] === 'number' ? (row[5] * 100).toFixed(0) + '%' : row[5]) : '';
+                const ga = row[6] !== '' ? row[6] : '';
+                const gaa = row[7] !== '' ? (typeof row[7] === 'number' ? row[7].toFixed(2) : row[7]) : '';
+
+                tr.innerHTML = `
+                    <td><b>${name}</b></td>
+                    <td>${o}</td>
+                    <td>${v}</td>
+                    <td>${m}</td>
+                    <td>${gpg}</td>
+                    <td>${vPct}</td>
+                    <td>${ga}</td>
+                    <td>${gaa}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function sortData(columnIndex, direction) {
+            tableData.sort((a, b) => {
+                let valA = a[columnIndex];
+                let valB = b[columnIndex];
+
+                // Jos solu on tyhjä, laitetaan se listan loppuun
+                if (valA === '' || valA === null) return 1;
+                if (valB === '' || valB === null) return -1;
+
+                // Muutetaan prosenttitekstit numeroiksi vertailua varten jos tarpeen
+                if (typeof valA === 'string' && valA.includes('%')) valA = parseFloat(valA);
+                if (typeof valB === 'string' && valB.includes('%')) valB = parseFloat(valB);
+
+                if (direction === 'asc') {
+                    return valA > valB ? 1 : -1;
+                } else {
+                    return valA < valB ? 1 : -1;
+                }
+            });
+            renderTable(tableData);
+        }
+
+        window.onload = loadStats;
+    </script>
+</body>
+</html>
