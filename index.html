@@ -17,6 +17,10 @@ html<!DOCTYPE html>
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
+        
+        /* TÄMÄ UUSI RIVI VAIHTAA JOKA TOISEN RIVIN VÄRIN VAALEAN HARMAAKSI */
+        tr:nth-child(even) { background-color: #f1f5f9; }
+        
         tr:last-child td { border-bottom: none; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
@@ -36,7 +40,6 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
         <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
@@ -106,7 +109,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
