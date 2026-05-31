@@ -9,16 +9,15 @@
 body{
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     background:linear-gradient(180deg,#eef2f7 0%,#dfe7f1 100%);
+    color:#333;
     margin:0;
     padding:10px;
-    color:#333;
-    padding-bottom:80px; /* tilaa bottom barille */
+    min-height:100vh;
 }
 
-/* HEADER */
 h1{
     text-align:center;
-    font-size:28px;
+    font-size:30px;
     font-weight:800;
     margin-bottom:5px;
     color:#1c2733;
@@ -26,23 +25,23 @@ h1{
 
 .subtitle{
     text-align:center;
-    font-size:14px;
     color:#64748b;
+    font-size:14px;
+    margin-bottom:5px;
 }
 
 #updated{
     text-align:center;
-    font-size:12px;
     color:#64748b;
-    margin-bottom:15px;
+    font-size:12px;
+    margin-bottom:18px;
 }
 
-/* NAPIT */
 .button-grid{
     display:grid;
     grid-template-columns:repeat(2,1fr);
     gap:8px;
-    margin-bottom:15px;
+    margin-bottom:18px;
 }
 
 button{
@@ -50,25 +49,34 @@ button{
     color:white;
     border:none;
     padding:10px;
+    font-size:13px;
     font-weight:700;
     border-radius:12px;
     cursor:pointer;
     transition:.2s;
+    box-shadow:0 3px 8px rgba(0,0,0,.12);
 }
 
-button:active{ transform:scale(.97); }
+button:hover{
+    transform:translateY(-2px);
+}
+
+button:active{
+    transform:scale(.97);
+}
 
 .full-width{
     grid-column:span 2;
     background:linear-gradient(135deg,#ef4444,#dc2626);
 }
 
-/* TAULUKKO */
 .table-container{
     background:white;
     border-radius:16px;
     overflow:hidden;
-    box-shadow:0 8px 24px rgba(0,0,0,.08);
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.08),
+        0 2px 6px rgba(0,0,0,.04);
 }
 
 table{
@@ -80,17 +88,30 @@ table{
 th{
     background:#1e293b;
     color:white;
+    font-weight:700;
+    letter-spacing:.3px;
     padding:8px 5px;
     text-align:left;
 }
 
 td{
     padding:7px 5px;
-    border-bottom:1px solid #eee;
+    border-bottom:1px solid #eceff3;
 }
 
 tbody tr:nth-child(even){
     background:#f8fafc;
+}
+
+tbody tr:hover{
+    background:#eef6ff !important;
+}
+
+.loading{
+    text-align:center;
+    padding:20px;
+    font-weight:bold;
+    color:#666;
 }
 
 .highlight-column{
@@ -98,46 +119,43 @@ tbody tr:nth-child(even){
     font-weight:700;
 }
 
-.loading{
-    text-align:center;
-    padding:20px;
-    font-weight:bold;
+/* Pelaajasarake */
+th:first-child,
+td:first-child{
+    max-width:95px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
 }
 
-/* =========================
-   🔽 BOTTOM SEASON BAR
-========================= */
+/* Mobiili */
+@media (max-width:600px){
 
-.bottom-bar{
-    position:fixed;
-    bottom:0;
-    left:0;
-    right:0;
-    background:#0f172a;
-    padding:10px;
-    display:flex;
-    gap:10px;
-    align-items:center;
-    justify-content:center;
-    box-shadow:0 -4px 15px rgba(0,0,0,.2);
-}
+    body{
+        padding:6px;
+    }
 
-.bottom-bar select{
-    padding:10px;
-    border-radius:10px;
-    border:none;
-    font-weight:700;
-    background:#1e293b;
-    color:white;
-    outline:none;
-}
+    table{
+        font-size:11px;
+    }
 
-.bottom-bar button{
-    padding:10px 14px;
-    border-radius:10px;
-    background:linear-gradient(135deg,#0ea5e9,#0284c7);
-    border:none;
-    font-weight:800;
+    th, td{
+        padding:6px 3px;
+    }
+
+    th:first-child,
+    td:first-child{
+        max-width:70px;
+    }
+
+    h1{
+        font-size:24px;
+    }
+
+    button{
+        font-size:11px;
+        padding:8px 4px;
+    }
 }
 </style>
 </head>
@@ -145,7 +163,7 @@ tbody tr:nth-child(even){
 <body>
 
 <h1>🏆 Pelaajatilastot</h1>
-<div class="subtitle">Google Sheets kausittain</div>
+<div class="subtitle">Google Sheetsistä päivittyvät tilastot</div>
 <div id="updated"></div>
 
 <div class="button-grid">
@@ -158,11 +176,11 @@ tbody tr:nth-child(even){
     <button onclick="sortData(3,'desc')">Maalit ↓</button>
     <button onclick="sortData(3,'asc')">Maalit ↑</button>
 
-    <button onclick="sortData(4,'desc')">GPG</button>
-    <button onclick="sortData(4,'asc')">GPG ↑</button>
+    <button onclick="sortData(4,'desc')">Paras GPG</button>
+    <button onclick="sortData(4,'asc')">Pienin GPG</button>
 
-    <button onclick="sortData(5,'desc')">V%</button>
-    <button onclick="sortData(5,'asc')">V% ↑</button>
+    <button onclick="sortData(5,'desc')">Paras V%</button>
+    <button onclick="sortData(5,'asc')">Pienin V%</button>
 
     <button onclick="sortData(6,'desc')" class="full-width">
         Päästetyt maalit
@@ -170,137 +188,140 @@ tbody tr:nth-child(even){
 </div>
 
 <div class="table-container">
-    <div id="loading" class="loading">Ladataan...</div>
+    <div id="loading" class="loading">
+        Ladataan tilastoja...
+    </div>
 
     <table id="statsTable" style="display:none;">
         <thead>
-        <tr>
-            <th>Pelaaja</th>
-            <th>O</th>
-            <th>V</th>
-            <th>M</th>
-            <th>GPG</th>
-            <th>V%</th>
-            <th>GA</th>
-            <th>GAA</th>
-        </tr>
+            <tr>
+                <th>Pelaaja</th>
+                <th>O</th>
+                <th>V</th>
+                <th>M</th>
+                <th>GPG</th>
+                <th>V%</th>
+                <th>GA</th>
+                <th>GAA</th>
+            </tr>
         </thead>
         <tbody id="tableBody"></tbody>
     </table>
 </div>
 
-<!-- 🔽 BOTTOM SEASON SELECT -->
-<div class="bottom-bar">
-    <select id="seasonSelect" onchange="changeSeason()">
-        <option value="0">🏆 Kausi 1</option>
-        <option value="123456789">📅 Kausi 2</option>
-    </select>
-
-    <button onclick="reloadSeason()">Vaihda</button>
-</div>
-
 <script>
-
 const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
 
 let tableData = [];
 let activeColumn = null;
-let currentGid = 0;
 
-/* LOAD SHEET */
-function loadSheet(gid){
+document.getElementById("updated").textContent =
+    "Päivitetty: " + new Date().toLocaleString("fi-FI");
 
-    currentGid = gid;
-
-    document.getElementById('loading').style.display='block';
-    document.getElementById('statsTable').style.display='none';
-
-    const old = document.getElementById('sheetScript');
-    if(old) old.remove();
-
-    const script = document.createElement('script');
-    script.id = 'sheetScript';
-
-    script.src =
-    `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=${gid}`;
-
-    document.body.appendChild(script);
-}
-
-/* CALLBACK */
 function koodiMestari(data){
 
-    if(!data || !data.table) return;
+    try{
 
-    let rows = data.table.rows;
+        if(!data || !data.table || !data.table.rows){
+            document.getElementById('loading').innerText =
+            'Virhe tiedon rakenteessa.';
+            return;
+        }
 
-    tableData = rows.map(r =>
-        r.c.map(c => c ? (c.f || c.v || '') : '')
-    );
+        const rows = data.table.rows;
 
-    if(tableData.length && tableData[0][0].toLowerCase().includes('pelaaja')){
-        tableData.shift();
+        let rawData = rows.map(row=>{
+            if(!row || !row.c) return [];
+
+            return row.c.map(cell=>{
+                if(!cell) return '';
+                return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
+            });
+
+        }).filter(row=>row.length>0);
+
+        if(
+            rawData.length>0 &&
+            rawData[0][0].toString().toLowerCase().includes('pelaaja')
+        ){
+            rawData.shift();
+        }
+
+        tableData = rawData;
+
+        document.getElementById('loading').style.display='none';
+        document.getElementById('statsTable').style.display='table';
+
+        renderTable(tableData);
+
+    }catch(error){
+        console.error(error);
     }
-
-    document.getElementById('loading').style.display='none';
-    document.getElementById('statsTable').style.display='table';
-
-    renderTable(tableData);
 }
 
-/* RENDER */
+const script = document.createElement('script');
+script.src =
+`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+document.body.appendChild(script);
+
 function renderTable(data){
 
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML='';
 
-    data.forEach(row=>{
+    data.forEach((row)=>{
 
         const tr = document.createElement('tr');
 
+        const name = row[0] || '';
+        const o = row[1] || '0';
+        const v = row[2] || '0';
+        const m = row[3] || '0';
+
+        let gpg = row[4] || '';
+        let vpct = row[5] || '';
+
+        const ga = row[6] || '0';
+        let gaa = row[7] || '';
+
+        if(gpg=='0' || gpg=='0.00') gpg='';
+        if(gaa=='0' || gaa=='0.00') gaa='';
+        if(vpct=='0' || vpct=='0%') vpct='';
+
         tr.innerHTML = `
-        <td class="${activeColumn===0?'highlight-column':''}"><b>${row[0]}</b></td>
-        <td class="${activeColumn===1?'highlight-column':''}">${row[1]}</td>
-        <td class="${activeColumn===2?'highlight-column':''}">${row[2]}</td>
-        <td class="${activeColumn===3?'highlight-column':''}">${row[3]}</td>
-        <td class="${activeColumn===4?'highlight-column':''}">${row[4]}</td>
-        <td class="${activeColumn===5?'highlight-column':''}">${row[5]}</td>
-        <td class="${activeColumn===6?'highlight-column':''}">${row[6]}</td>
-        <td class="${activeColumn===7?'highlight-column':''}">${row[7]}</td>
+            <td class="${activeColumn===0?'highlight-column':''}"><b>${name}</b></td>
+            <td class="${activeColumn===1?'highlight-column':''}">${o}</td>
+            <td class="${activeColumn===2?'highlight-column':''}">${v}</td>
+            <td class="${activeColumn===3?'highlight-column':''}">${m}</td>
+            <td class="${activeColumn===4?'highlight-column':''}">${gpg}</td>
+            <td class="${activeColumn===5?'highlight-column':''}">${vpct}</td>
+            <td class="${activeColumn===6?'highlight-column':''}">${ga}</td>
+            <td class="${activeColumn===7?'highlight-column':''}">${gaa}</td>
         `;
 
         tbody.appendChild(tr);
     });
 }
 
-/* SORT */
-function sortData(i,dir){
+function sortData(columnIndex,direction){
 
-    activeColumn = i;
+    activeColumn = columnIndex;
 
     tableData.sort((a,b)=>{
 
-        let A = parseFloat((a[i]||0).toString().replace(',','.'))||0;
-        let B = parseFloat((b[i]||0).toString().replace(',','.'))||0;
+        let valA=(a[columnIndex]||'0').toString();
+        let valB=(b[columnIndex]||'0').toString();
 
-        return dir==='asc' ? A-B : B-A;
+        let numA=parseFloat(valA.replace(',','.').replace('%','')) || 0;
+        let numB=parseFloat(valB.replace(',','.').replace('%','')) || 0;
+
+        return direction==='asc'
+            ? (numA > numB ? 1 : -1)
+            : (numA < numB ? 1 : -1);
     });
 
     renderTable(tableData);
 }
-
-/* SEASON CHANGE */
-function changeSeason(){
-    currentGid = document.getElementById('seasonSelect').value;
-}
-
-function reloadSeason(){
-    loadSheet(currentGid);
-}
-
-/* INIT */
-loadSheet(0);
-
 </script>
 
 </body>
