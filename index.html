@@ -35,17 +35,17 @@ html<!DOCTYPE html>
     <div id="publicView">
         <h1>🏆 Pelaajatilastot</h1>
         <div class="button-grid">
-            <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
-            <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
-            <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
-            <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
-            <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
-            <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
-            <button onclick="sortData(4, 'desc')">Paras GPG</button>
-            <button onclick="sortData(4, 'asc')">Pienin GPG</button>
-            <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
-            <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-            <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
+            <button onclick="sortData('o', 'desc')">Ottelut (Isoin ensin)</button>
+            <button onclick="sortData('o', 'asc')">Ottelut (Pienin ensin)</button>
+            <button onclick="sortData('v', 'desc')">Voitot (Isoin ensin)</button>
+            <button onclick="sortData('v', 'asc')">Voitot (Pienin ensin)</button>
+            <button onclick="sortData('m', 'desc')">Maalit (Isoin ensin)</button>
+            <button onclick="sortData('m', 'asc')">Maalit (Pienin ensin)</button>
+            <button onclick="sortData('gpg', 'desc')">Paras GPG</button>
+            <button onclick="sortData('gpg', 'asc')">Pienin GPG</button>
+            <button onclick="sortData('vPct', 'desc')">Paras Voitto%</button>
+            <button onclick="sortData('vPct', 'asc')">Pienin Voitto%</button>
+            <button onclick="sortData('ga', 'desc')" class="full-width">Päästetyt maalit</button>
         </div>
         <div class="table-container">
             <table id="statsTable">
@@ -90,12 +90,9 @@ html<!DOCTYPE html>
         function calculateAverages() {
             dataset.forEach(p => {
                 p.o = parseInt(p.o) || 0; p.v = parseInt(p.v) || 0; p.m = parseInt(p.m) || 0; p.ga = parseInt(p.ga) || 0;
-                p.gpg = p.o > 0 ? (p.m / p.o).toFixed(2) : '';
-                p.vPct = p.o > 0 ? ((p.v / p.o) * 100).toFixed(0) + '%' : '';
-                p.gaa = p.o > 0 ? (p.ga / p.o).toFixed(2) : '';
-                if(p.gpg == '0' || p.gpg == '0.00') p.gpg = '';
-                if(p.gaa == '0' || p.gaa == '0.00') p.gaa = '';
-                if(p.vPct == '0%') p.vPct = '';
+                p.gpg = p.o > 0 ? (p.m / p.o).toFixed(2) : 0;
+                p.vPct = p.o > 0 ? Math.round((p.v / p.o) * 100) : 0;
+                p.gaa = p.o > 0 ? (p.ga / p.o).toFixed(2) : 0;
             });
         }
 
@@ -103,78 +100,131 @@ html<!DOCTYPE html>
             const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             dataset.forEach(p => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td><b>${p.nimi}</b></td><td>${p.o}</td><td>${p.v}</td><td>${p.m}</td><td>${p.gpg}</td><td>${p.vPct}</td><td>${p.ga}</td><td>${p.gaa}</td>`;
+                tr.innerHTML = `
+                    <td><b>${p.nimi}</b></td>
+                    <td>${p.o}</td>
+                    <td>${p.v}</td>
+                    <td>${p.m}</td>
+                    <td>${p.gpg > 0 ? p.gpg : ''}</td>
+                    <td>${p.vPct > 0 ? p.vPct + '%' : ''}</td>
+                    <td>${p.ga}</td>
+                    <td>${p.gaa > 0 ? p.gaa : ''}</td>
+                `;
                 tbody.appendChild(tr);
             });
         }
+        html<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelaajatilastot</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f9; color: #333; margin: 0; padding: 10px; }
+        h1 { text-align: center; font-size: 24px; margin-bottom: 15px; color: #1a1a1a; }
+        .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
+        button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+        button:active { background-color: #0056b3; }
+        .full-width { grid-column: span 2; background-color: #dc3545; }
+        .full-width:active { background-color: #bd2130; }
+        .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+        th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
+        th { background-color: #f8f9fa; font-weight: bold; color: #666; }
+        tr:nth-child(even) { background-color: #eaedf2; }
+        .active-sort td:nth-child(var(--active-col)) { background-color: #bae6fd !important; font-weight: bold; color: #000; }
+        tr:last-child td { border-bottom: none; }
+        .admin-section { display: none; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 20px; color: #333; }
+        .admin-row { display: grid; grid-template-columns: 2fr repeat(4, 1fr) auto; gap: 4px; margin-bottom: 8px; align-items: center; }
+        .admin-row input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fff; color: #333; }
+        .admin-header { font-weight: bold; font-size: 12px; color: #666; text-align: center; }
+        .admin-header:first-child { text-align: left; }
+        .admin-buttons { margin-top: 15px; display: flex; gap: 10px; }
+        .btn-sec { background-color: #6c757d; }
+        .btn-danger { background-color: #dc3545; padding: 6px 10px; font-size: 12px; }
+        .toggle-admin-btn { background-color: #28a745; margin-top: 20px; width: 100%; padding: 12px; font-size: 16px; }
+    </style>
+</head>
+<body>
 
-        function sortData(col, dir) {
-            const keys = ['', 'o', 'v', 'm', 'gpg', 'vPct', 'ga', 'gaa']; const key = keys[col];
-            dataset.sort((a, b) => {
-                let valA = (a[key] || '0').toString(); let valB = (b[key] || '0').toString();
-                let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
-                let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
-                return dir === 'asc' ? numA - numB : numB - numA;
+    <div id="publicView">
+        <h1>🏆 Pelaajatilastot</h1>
+        <div class="button-grid">
+            <button onclick="sortData('o', 'desc')">Ottelut (Isoin ensin)</button>
+            <button onclick="sortData('o', 'asc')">Ottelut (Pienin ensin)</button>
+            <button onclick="sortData('v', 'desc')">Voitot (Isoin ensin)</button>
+            <button onclick="sortData('v', 'asc')">Voitot (Pienin ensin)</button>
+            <button onclick="sortData('m', 'desc')">Maalit (Isoin ensin)</button>
+            <button onclick="sortData('m', 'asc')">Maalit (Pienin ensin)</button>
+            <button onclick="sortData('gpg', 'desc')">Paras GPG</button>
+            <button onclick="sortData('gpg', 'asc')">Pienin GPG</button>
+            <button onclick="sortData('vPct', 'desc')">Paras Voitto%</button>
+            <button onclick="sortData('vPct', 'asc')">Pienin Voitto%</button>
+            <button onclick="sortData('ga', 'desc')" class="full-width">Päästetyt maalit</button>
+        </div>
+        <div class="table-container">
+            <table id="statsTable">
+                <thead>
+                    <tr>
+                        <th>Pelaaja</th><th>O</th><th>V</th><th>M</th><th>GPG</th><th>V%</th><th>GA</th><th>GAA</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja suoraan sivulla</button>
+    </div>
+
+    <div id="adminView" class="admin-section">
+        <h2>🔒 Hallintapaneeli</h2>
+        <div class="admin-row">
+            <div class="admin-header">Nimi</div><div class="admin-header">O</div><div class="admin-header">V</div><div class="admin-header">M</div><div class="admin-header">GA</div><div></div>
+        </div>
+        <div id="adminRowsContainer"></div>
+        <div class="admin-buttons">
+            <button onclick="addNewPlayerRow()" class="btn-sec">+ Lisää pelaaja</button>
+            <button onclick="saveDataToGitHub()">💾 Tallenna muutokset livenä</button>
+            <button onclick="closeAdmin()" class="btn-sec">Peruuta</button>
+        </div>
+    </div>
+
+    <script>
+        const CONFIG = {
+            username: 'joonaaalto',
+            repo: 'tilastot',
+            salasana: 'joukkue123'
+        };
+
+        let dataset = [
+            { nimi: "Matti Pelaaja", o: 10, v: 6, m: 12, ga: 4 },
+            { nimi: "Pekka Pelaaja", o: 8, v: 4, m: 5, ga: 9 }
+        ];
+
+        function init() { calculateAverages(); renderTable(); }
+
+        function calculateAverages() {
+            dataset.forEach(p => {
+                p.o = parseInt(p.o) || 0; p.v = parseInt(p.v) || 0; p.m = parseInt(p.m) || 0; p.ga = parseInt(p.ga) || 0;
+                p.gpg = p.o > 0 ? (p.m / p.o).toFixed(2) : 0;
+                p.vPct = p.o > 0 ? Math.round((p.v / p.o) * 100) : 0;
+                p.gaa = p.o > 0 ? (p.ga / p.o).toFixed(2) : 0;
             });
-            const table = document.getElementById('statsTable'); table.classList.add('active-sort'); table.style.setProperty('--active-col', col + 1); renderTable();
-        }
-        function openAdmin() {
-            const syote = prompt("Syötä joukkueen salasana:");
-            if (syote === CONFIG.salasana) {
-                let token = localStorage.getItem('my_git_token');
-                if (!token) {
-                    const tokenSyote = prompt("Syötä GitHub API-koodisi (ghp_...): \n(Tämä kysytään vain ensimmäisellä kerralla ja se tallentuu puhelimesi muistiin)");
-                    if (tokenSyote && tokenSyote.startsWith('ghp_')) {
-                        localStorage.setItem('my_git_token', tokenSyote.trim());
-                    } else {
-                        alert("Virheellinen avain!");
-                        return;
-                    }
-                }
-                document.getElementById('publicView').style.display = 'none';
-                document.getElementById('adminView').style.display = 'block';
-                buildAdminRows();
-            } else if (syote !== null) {
-                alert("Väärä salasana!");
-            }
         }
 
-        function closeAdmin() { 
-            document.getElementById('adminView').style.display = 'none'; 
-            document.getElementById('publicView').style.display = 'block'; 
-        }
-
-        function buildAdminRows() {
-            const container = document.getElementById('adminRowsContainer'); container.innerHTML = '';
-            dataset.forEach((p, idx) => {
-                const div = document.createElement('div'); div.className = 'admin-row';
-                div.innerHTML = `<input type="text" value="${p.nimi}" data-field="nimi" data-idx="${idx}"><input type="number" value="${p.o}" data-field="o" data-idx="${idx}"><input type="number" value="${p.v}" data-field="v" data-idx="${idx}"><input type="number" value="${p.m}" data-field="m" data-idx="${idx}"><input type="number" value="${p.ga}" data-field="ga" data-idx="${idx}"><button class="btn-danger" onclick="deletePlayerRow(${idx})">X</button>`;
-                container.appendChild(div);
+        function renderTable() {
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
+            dataset.forEach(p => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${p.nimi}</b></td>
+                    <td>${p.o}</td>
+                    <td>${p.v}</td>
+                    <td>${p.m}</td>
+                    <td>${p.gpg > 0 ? p.gpg : ''}</td>
+                    <td>${p.vPct > 0 ? p.vPct + '%' : ''}</td>
+                    <td>${p.ga}</td>
+                    <td>${p.gaa > 0 ? p.gaa : ''}</td>
+                `;
+                tbody.appendChild(tr);
             });
         }
-
-        function addNewPlayerRow() { dataset.push({ nimi: "Uusi Pelaaja", o: 0, v: 0, m: 0, ga: 0 }); buildAdminRows(); }
-        function deletePlayerRow(idx) { dataset.splice(idx, 1); buildAdminRows(); }
-
-        async function saveDataToGitHub() {
-            const inputs = document.querySelectorAll('#adminRowsContainer input');
-            inputs.forEach(input => { dataset[input.getAttribute('data-idx')][input.getAttribute('data-field')] = input.value; });
-            calculateAverages();
-            const button = document.querySelector('#adminView button:nth-child(2)'); button.innerText = "⏳ Tallennetaan..."; button.disabled = true;
-            
-            const activeToken = localStorage.getItem('my_git_token');
-            try {
-                const fileUrl = `https://github.com{CONFIG.username}/${CONFIG.repo}/contents/index.html`;
-                const getRes = await fetch(fileUrl, { headers: { 'Authorization': `token ${activeToken}` } });
-                const getData = await getRes.json(); const sha = getData.sha;
-                let fullHtml = document.documentElement.outerHTML; fullHtml = '<!DOCTYPE html>\n<html>' + fullHtml + '</html>';
-                const cleanData = dataset.map(p => ({ nimi: p.nimi, o: parseInt(p.o), v: parseInt(p.v), m: parseInt(p.m), ga: parseInt(p.ga) }));
-                fullHtml = fullHtml.replace(/let dataset = \[\s*[\s\S]*?\s*\];/, `let dataset = ${JSON.stringify(cleanData, null, 12)};`);
-                const putRes = await fetch(fileUrl, { method: 'PUT', headers: { 'Authorization': `token ${activeToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ message: 'Tilastopaivitys', content: btoa(unescape(encodeURIComponent(fullHtml))), sha: sha }) });
-                if (putRes.ok) { alert("🎉 Tallennettu onnistuneesti! Sivu päivittyy livenä noin minuutissa."); location.reload(); } else { throw new Error(); }
-            } catch (err) { alert("Virhe tallennuksessa. Jos vaihdoit avaimesi, tyhjennä selaimen evästeet."); button.innerText = "💾 Tallenna livenä"; button.disabled = false; }
-        }
-        window.onload = init;
-    </script>
-</body>
-</html>
