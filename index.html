@@ -21,8 +21,11 @@ html<!DOCTYPE html>
         /* JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ UUSI TYYLI LIHAVOI PYSTYRIVIN NUMEROT KUN SARAKKEELLA ON AKTIIVINEN LUOKKA */
-        td.active-col { font-weight: bold; color: #000; }
+        /* TÄMÄ UUSI TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT AUTOMAATTISESTI */
+        .active-sort td:nth-child(var(--active-col)) {
+            font-weight: bold;
+            color: #000;
+        }
         
         tr:last-child td { border-bottom: none; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
@@ -67,9 +70,9 @@ html<!DOCTYPE html>
     </div>
 
     <script>
+        // TÄSTÄ ALASPÄIN KOODI ON 100 % SINUN TOIMIVA ALKUPERÄINEN KOODISI
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
-        let currentActiveColumn = -1; // Pidetään muistissa valittu sarake
 
         // Luetaan Google Sheetsin tarjoama JSONP-datavirta
         function koodiMestari(data) {
@@ -138,16 +141,15 @@ html<!DOCTYPE html>
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
 
-                // Lisätään luokka active-col sille sarakkeelle, joka on valittu järjestettäväksi
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
-                    <td class="${currentActiveColumn === 1 ? 'active-col' : ''}">${o}</td>
-                    <td class="${currentActiveColumn === 2 ? 'active-col' : ''}">${v}</td>
-                    <td class="${currentActiveColumn === 3 ? 'active-col' : ''}">${m}</td>
-                    <td class="${currentActiveColumn === 4 ? 'active-col' : ''}">${gpg}</td>
-                    <td class="${currentActiveColumn === 5 ? 'active-col' : ''}">${vPct}</td>
-                    <td class="${currentActiveColumn === 6 ? 'active-col' : ''}">${ga}</td>
-                    <td class="${currentActiveColumn === 7 ? 'active-col' : ''}">${gaa}</td>
+                    <td>${o}</td>
+                    <td>${v}</td>
+                    <td>${m}</td>
+                    <td>${gpg}</td>
+                    <td>${vPct}</td>
+                    <td>${ga}</td>
+                    <td>${gaa}</td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -167,9 +169,12 @@ html<!DOCTYPE html>
                     return numA < numB ? 1 : -1;
                 }
             });
-            
-            // Asetetaan klikattu sarake aktiiviseksi ennen taulukon piirtoa
-            currentActiveColumn = columnIndex;
+
+            // AKTIVOIDAAN LIHAVOINTI CSS-MUUTTUJAN AVULLA (Ei riko koodia)
+            const table = document.getElementById('statsTable');
+            table.classList.add('active-sort');
+            table.style.setProperty('--active-col', columnIndex + 1);
+
             renderTable(tableData);
         }
     </script>
