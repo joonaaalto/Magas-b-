@@ -10,29 +10,10 @@ html<!DOCTYPE html>
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         button:active { background-color: #0056b3; }
-        /* Tehdään uudesta Päästetyt maalit -napista punainen ja koko näytön levyinen */
-        .full-width { grid-column: span 2; background-color: #dc3545; }
-        .full-width:active { background-color: #bd2130; }
         .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
-        
-        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
-        tr:nth-child(even) { background-color: #eaedf2; }
-        
-        /* TÄMÄ CSS-KIKKA VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN AUTOMAATTISESTI ILMAN SCRIPT-MUUTOKSIA */
-        .show-col-1 td:nth-child(2),
-        .show-col-2 td:nth-child(3),
-        .show-col-3 td:nth-child(4),
-        .show-col-4 td:nth-child(5),
-        .show-col-5 td:nth-child(6),
-        .show-col-6 td:nth-child(7) {
-            background-color: #e0f2fe !important;
-            font-weight: bold;
-            color: #000;
-        }
-        
         tr:last-child td { border-bottom: none; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
@@ -42,18 +23,20 @@ html<!DOCTYPE html>
     <h1>🏆 Pelaajatilastot</h1>
 
     <div class="button-grid">
-        <button onclick="sortData(1, 'desc'); document.getElementById('statsTable').className='show-col-1'">Ottelut (Isoin ensin)</button>
-        <button onclick="sortData(1, 'asc'); document.getElementById('statsTable').className='show-col-1'">Ottelut (Pienin ensin)</button>
-        <button onclick="sortData(2, 'desc'); document.getElementById('statsTable').className='show-col-2'">Voitot (Isoin ensin)</button>
-        <button onclick="sortData(2, 'asc'); document.getElementById('statsTable').className='show-col-2'">Voitot (Pienin ensin)</button>
-        <button onclick="sortData(3, 'desc'); document.getElementById('statsTable').className='show-col-3'">Maalit (Isoin ensin)</button>
-        <button onclick="sortData(3, 'asc'); document.getElementById('statsTable').className='show-col-3'">Maalit (Pienin ensin)</button>
-        <button onclick="sortData(4, 'desc'); document.getElementById('statsTable').className='show-col-4'">Paras GPG</button>
-        <button onclick="sortData(4, 'asc'); document.getElementById('statsTable').className='show-col-4'">Pienin GPG</button>
-        <button onclick="sortData(5, 'desc'); document.getElementById('statsTable').className='show-col-5'">Paras Voitto%</button>
-        <button onclick="sortData(5, 'asc'); document.getElementById('statsTable').className='show-col-5'">Pienin Voitto%</button>
-        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
-        <button onclick="sortData(6, 'desc'); document.getElementById('statsTable').className='show-col-6'" class="full-width">Päästetyt maalit</button>
+        <button onclick="sortData(1, 'desc')">Ottelut (Isot ensin)</button>
+        <button onclick="sortData(1, 'asc')">Ottelut (Pienet ensin)</button>
+        <button onclick="sortData(2, 'desc')">Voitot (Isot ensin)</button>
+        <button onclick="sortData(2, 'asc')">Voitot (Pienet ensin)</button>
+        <button onclick="sortData(3, 'desc')">Maalit (Isot ensin)</button>
+        <button onclick="sortData(3, 'asc')">Maalit (Pienet ensin)</button>
+        <button onclick="sortData(4, 'desc')">Paras GPG</button>
+        <button onclick="sortData(4, 'asc')">Pienin GPG</button>
+        <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
+        <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <button onclick="sortData(6, 'desc')">Eniten GA</button>
+        <button onclick="sortData(6, 'asc')">Vähiten GA</button>
+        <button onclick="sortData(7, 'desc')">Suurin GAA</button>
+        <button onclick="sortData(7, 'asc')">Pienin GAA</button>
     </div>
 
     <div class="table-container">
@@ -122,7 +105,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
