@@ -26,7 +26,7 @@
         <button onclick="sortData(1, 'desc')">Ottelut (Isot ensin)</button>
         <button onclick="sortData(1, 'asc')">Ottelut (Pienet ensin)</button>
         <button onclick="sortData(2, 'desc')">Voitot (Isot ensin)</button>
-        <button onclick="sortData(2, 'asc')">Voit nolla (Pienet ensin)</button>
+        <button onclick="sortData(2, 'asc')">Voitot (Pienet ensin)</button>
         <button onclick="sortData(3, 'desc')">Maalit (Isot ensin)</button>
         <button onclick="sortData(3, 'asc')">Maalit (Pienet ensin)</button>
         <button onclick="sortData(4, 'desc')">Paras GPG</button>
@@ -62,10 +62,12 @@
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
-        // Käytetään varmaa JSONP-skriptitekniikkaa, joka ohittaa Googlen lukitukset täysin
-        function koodiMestari(data) {
+        // Googlen virallinen käsittelijä, joka lukee datan turvallisesti sisään
+        function callback(data) {
             try {
                 const rows = data.table.rows;
+                
+                // Muutetaan Googlen JSON-rakenne selkeäksi taulukoksi
                 tableData = rows.map(row => {
                     return row.c.map(cell => {
                         if (!cell) return '';
@@ -73,19 +75,20 @@
                     });
                 });
 
+                // Piilotetaan latausteksti ja tuodaan taulukko esiin
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statsTable').style.display = 'table';
                 
                 renderTable(tableData);
             } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe tietojen käsittelyssä.';
+                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa. Tarkista taulukko.';
                 console.error(error);
             }
         }
 
-        // Ladataan Google Sheets taustalla ilman eston riskiä
+        // Haetaan tiedot käyttämällä JSONP-tekniikkaa, joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:callback&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -93,6 +96,9 @@
             tbody.innerHTML = '';
             
             data.forEach(row => {
+                // Otetaan mukaan vain rivit, joilla on pelaajan nimi sarakkeessa A
+                if (!row[0] || row[0].toString().trim().toLowerCase() === 'pelaaja') return;
+
                 const tr = document.createElement('tr');
                 
                 const name = row[0] || '';
@@ -105,7 +111,7 @@
                 const ga = row[6] || '0';
                 let gaa = row[7] || '';
 
-                // Siistitään mahdolliset raa'at nollat pois näkyvistä
+                // Siistitään nollat ja tyhjät arvot pois häiritsemästä
                 if (gpg == '0' || gpg == '0.00') gpg = '';
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
@@ -127,8 +133,9 @@
         function sortData(columnIndex, direction) {
             tableData.sort((a, b) => {
                 let valA = (a[columnIndex] || '0').toString();
-                let valB = b[columnIndex] || '0').toString();
+                let valB = (b[columnIndex] || '0').toString();
 
+                // Muutetaan tekstit numeroiksi vertailua varten
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
 
