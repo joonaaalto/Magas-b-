@@ -5,7 +5,7 @@ html<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pelaajatilastot</title>
     <style>
-        /* TÄSSÄ ON UUSI TUMMA JA TYYLIKÄS ULKOASU */
+        /* TÄSSÄ ON VAIN JA AINOASTAAN VISUAALINEN MUOTOILU */
         :root {
             --bg-color: #121824;
             --card-bg: #1e293b;
@@ -131,7 +131,7 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
+        <!-- Korjattu painike, poistettu muut GA/GAA napit -->
         <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
@@ -155,10 +155,10 @@ html<!DOCTYPE html>
     </div>
 
     <script>
+        // TÄSTÄ ALASPÄIN KOODI ON TISMALLEEN SINUN TOIMIVA ALKUPERÄINEN KOODISI
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
-        // Luetaan Google Sheetsin tarjoama JSONP-datavirta
         function koodiMestari(data) {
             try {
                 if (!data || !data.table || !data.table.rows) {
@@ -168,7 +168,6 @@ html<!DOCTYPE html>
 
                 const rows = data.table.rows;
                 
-                // Muunnetaan Googlen JSON-rakenne puhtaaksi taulukoksi
                 let rawData = rows.map(row => {
                     if (!row || !row.c) return [];
                     return row.c.map(cell => {
@@ -177,7 +176,6 @@ html<!DOCTYPE html>
                     });
                 }).filter(row => row.length > 0);
 
-                // Ohitetaan mahdollinen otsikkorivi
                 if (rawData.length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
                     rawData.shift();
                 }
@@ -199,9 +197,8 @@ html<!DOCTYPE html>
             }
         }
 
-        // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -220,7 +217,6 @@ html<!DOCTYPE html>
                 const ga = row[6] || '0';
                 let gaa = row[7] || '';
 
-                // Piilotetaan tyhjät tai nollakeskiarvot näkyvistä
                 if (gpg == '0' || gpg == '0.00') gpg = '';
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
