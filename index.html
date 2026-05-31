@@ -22,7 +22,6 @@
 
     <h1>🏆 Pelaajatilastot</h1>
 
-    <!-- Napit jotka toimivat kännykällä yhdellä klikkauksella -->
     <div class="button-grid">
         <button onclick="sortData(1, 'desc')">Ottelut (Isot ensin)</button>
         <button onclick="sortData(1, 'asc')">Ottelut (Pienet ensin)</button>
@@ -60,22 +59,29 @@
     </div>
 
     <script>
-        // Sinun oma Google Sheets ID syötettynä suoraan tähän koodiin
+        // Vaihdettu haku CSV-muotoon, jotta Google Sheets ei estä sitä
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        const url = `https://google.com{sheetId}/gviz/tq?tqx=out:json`;
+        const url = `https://google.com{sheetId}/export?format=csv`;
 
         let tableData = [];
 
         async function loadStats() {
             try {
                 const response = await fetch(url);
-                const text = await response.text();
-                // Puhdistetaan Googlen palauttama JSON-muoto koodille luettavaksi
-                const jsonText = text.substring(text.indexOf("(") + 1, text.lastIndexOf(")"));
-                const data = JSON.parse(jsonText);
+                const csvText = await response.text();
                 
-                const rows = data.table.rows;
-                tableData = rows.map(row => row.c.map(cell => cell ? cell.v : ''));
+                // Parsitaan CSV-rivit taulukoksi
+                const lines = csvText.split('\n');
+                // Hypätään otsikkorivi yli (i = 1)
+                for (let i = 1; i < lines.length; i++) {
+                    if (!lines[i].trim()) continue;
+                    
+                    // Jaetaan rivi soluihin (huomioidaan mahdolliset lainausmerkit)
+                    const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
+                    if (row[0]) { // Jos pelaajan nimi löytyy
+                        tableData.push(row);
+                    }
+                }
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statsTable').style.display = 'table';
@@ -94,15 +100,23 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                // Haetaan solut sarakkeittain A-H (indeksit 0-7)
                 const name = row[0] || '';
-                const o = row[1] !== '' ? row[1] : '';
-                const v = row[2] !== '' ? row[2] : '';
-                const m = row[3] !== '' ? row[3] : '';
-                const gpg = row[4] !== '' ? (typeof row[4] === 'number' ? row[4].toFixed(2) : row[4]) : '';
-                const vPct = row[5] !== '' ? (typeof row[5] === 'number' ? (row[5] * 100).toFixed(0) + '%' : row[5]) : '';
-                const ga = row[6] !== '' ? row[6] : '';
-                const gaa = row[7] !== '' ? (typeof row[7] === 'number' ? row[7].toFixed(2) : row[7]) : '';
+                const o = row[1] || '';
+                const v = row[2] || '';
+                const m = row[3] || '';
+                
+                // Siistitään numerot ja prosentit oikeaan muotoon
+                let gpg = parseFloat(row[4].replace(',', '.')) || 0;
+                gpg = gpg > 0 ? gpg.toFixed(2) : '';
+                
+                let vPct = parseFloat(row[5].replace(',', '.').replace('%', '')) || 0;
+                if (vPct > 0 && vPct <= 1) vPct = vPct * 100; // Jos Sheets palauttaa desimaalina (esim 0.6)
+                vPct = vPct > 0 ? vPct.toFixed(0) + '%' : '';
+                
+                const ga = row[6] || '';
+                
+                let gaa = parseFloat(row[7].replace(',', '.')) || 0;
+                gaa = gaa > 0 ? gaa.toFixed(2) : '';
 
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
@@ -123,18 +137,14 @@
                 let valA = a[columnIndex];
                 let valB = b[columnIndex];
 
-                // Jos solu on tyhjä, laitetaan se listan loppuun
-                if (valA === '' || valA === null) return 1;
-                if (valB === '' || valB === null) return -1;
-
-                // Muutetaan prosenttitekstit numeroiksi vertailua varten jos tarpeen
-                if (typeof valA === 'string' && valA.includes('%')) valA = parseFloat(valA);
-                if (typeof valB === 'string' && valB.includes('%')) valB = parseFloat(valB);
+                // Muutetaan vertailtavat arvot numeroiksi, jos kyseessä on tilastosarake
+                let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
+                let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
 
                 if (direction === 'asc') {
-                    return valA > valB ? 1 : -1;
+                    return numA > numB ? 1 : -1;
                 } else {
-                    return valA < valB ? 1 : -1;
+                    return numA < numB ? 1 : -1;
                 }
             });
             renderTable(tableData);
