@@ -119,22 +119,7 @@ tbody tr:hover{
     font-weight:700;
 }
 
-.rank1{
-    color:#b8860b;
-    font-weight:800;
-}
-
-.rank2{
-    color:#6b7280;
-    font-weight:800;
-}
-
-.rank3{
-    color:#b45309;
-    font-weight:800;
-}
-
-/* Pelaajasarake kapeammaksi */
+/* Pelaajasarake */
 th:first-child,
 td:first-child{
     max-width:95px;
@@ -154,11 +139,7 @@ td:first-child{
         font-size:11px;
     }
 
-    th{
-        padding:6px 3px;
-    }
-
-    td{
+    th, td{
         padding:6px 3px;
     }
 
@@ -257,10 +238,10 @@ function koodiMestari(data){
                 return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
             });
 
-        }).filter(row=>row.length > 0);
+        }).filter(row=>row.length>0);
 
         if(
-            rawData.length > 0 &&
+            rawData.length>0 &&
             rawData[0][0].toString().toLowerCase().includes('pelaaja')
         ){
             rawData.shift();
@@ -288,7 +269,7 @@ function renderTable(data){
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML='';
 
-    data.forEach((row,index)=>{
+    data.forEach((row)=>{
 
         const tr = document.createElement('tr');
 
@@ -307,15 +288,8 @@ function renderTable(data){
         if(gaa=='0' || gaa=='0.00') gaa='';
         if(vpct=='0' || vpct=='0%') vpct='';
 
-        let medal = '';
-        let rankClass = '';
-
-        if(index===0){ medal='🥇 '; rankClass='rank1'; }
-        else if(index===1){ medal='🥈 '; rankClass='rank2'; }
-        else if(index===2){ medal='🥉 '; rankClass='rank3'; }
-
         tr.innerHTML = `
-            <td class="${activeColumn===0?'highlight-column':''} ${rankClass}"><b>${medal}${name}</b></td>
+            <td class="${activeColumn===0?'highlight-column':''}"><b>${name}</b></td>
             <td class="${activeColumn===1?'highlight-column':''}">${o}</td>
             <td class="${activeColumn===2?'highlight-column':''}">${v}</td>
             <td class="${activeColumn===3?'highlight-column':''}">${m}</td>
