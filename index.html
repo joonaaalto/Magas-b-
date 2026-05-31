@@ -59,28 +59,36 @@
     </div>
 
     <script>
-        // Vaihdettu haku CSV-muotoon, jotta Google Sheets ei estä sitä
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        const url = `https://google.com{sheetId}/export?format=csv`;
+        const url = `https://google.com{sheetId}/pub?output=csv`;
 
         let tableData = [];
 
         async function loadStats() {
             try {
                 const response = await fetch(url);
+                if (!response.ok) throw new Error('Verkkovirhe');
                 const csvText = await response.text();
                 
-                // Parsitaan CSV-rivit taulukoksi
                 const lines = csvText.split('\n');
-                // Hypätään otsikkorivi yli (i = 1)
+                tableData = [];
+
+                // Aloitetaan riviltä 2 (i = 1), jotta otsikkorivi hypätään yli
                 for (let i = 1; i < lines.length; i++) {
                     if (!lines[i].trim()) continue;
                     
-                    // Jaetaan rivi soluihin (huomioidaan mahdolliset lainausmerkit)
-                    const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
-                    if (row[0]) { // Jos pelaajan nimi löytyy
+                    // Suomalainen Sheets käyttää puolipistettä (;) sarakkeiden erottamiseen
+                    const row = lines[i].split(';').map(cell => cell.replace(/^"|"$/g, '').trim());
+                    
+                    // Otetaan mukaan vain ne rivit, joissa on pelaajan nimi
+                    if (row && row[0] !== '') {
                         tableData.push(row);
                     }
+                }
+
+                if (tableData.length === 0) {
+                    document.getElementById('loading').innerText = 'Taulukko on tyhjä tai sitä ei voitu lukea.';
+                    return;
                 }
 
                 document.getElementById('loading').style.display = 'none';
@@ -100,23 +108,15 @@
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
+                // Haetaan solut järjestyksessä A-H
                 const name = row[0] || '';
-                const o = row[1] || '';
-                const v = row[2] || '';
-                const m = row[3] || '';
-                
-                // Siistitään numerot ja prosentit oikeaan muotoon
-                let gpg = parseFloat(row[4].replace(',', '.')) || 0;
-                gpg = gpg > 0 ? gpg.toFixed(2) : '';
-                
-                let vPct = parseFloat(row[5].replace(',', '.').replace('%', '')) || 0;
-                if (vPct > 0 && vPct <= 1) vPct = vPct * 100; // Jos Sheets palauttaa desimaalina (esim 0.6)
-                vPct = vPct > 0 ? vPct.toFixed(0) + '%' : '';
-                
-                const ga = row[6] || '';
-                
-                let gaa = parseFloat(row[7].replace(',', '.')) || 0;
-                gaa = gaa > 0 ? gaa.toFixed(2) : '';
+                const o = row[1] || '0';
+                const v = row[2] || '0';
+                const m = row[3] || '0';
+                const gpg = row[4] || '';
+                const vPct = row[5] || '';
+                const ga = row[6] || '0';
+                const gaa = row[7] || '';
 
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
@@ -134,10 +134,10 @@
 
         function sortData(columnIndex, direction) {
             tableData.sort((a, b) => {
-                let valA = a[columnIndex];
-                let valB = b[columnIndex];
+                let valA = a[columnIndex] || '0';
+                let valB = b[columnIndex] || '0';
 
-                // Muutetaan vertailtavat arvot numeroiksi, jos kyseessä on tilastosarake
+                // Muutetaan suomalaiset pilkkudesimaalit ja prosentit numeroiksi
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
 
