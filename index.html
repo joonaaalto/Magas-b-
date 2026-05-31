@@ -70,6 +70,18 @@ button:active{
     background:linear-gradient(135deg,#ef4444,#dc2626);
 }
 
+/* KAUSINAPIT */
+.season-buttons{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:8px;
+    margin-bottom:10px;
+}
+
+.season-buttons button{
+    background:linear-gradient(135deg,#0ea5e9,#0284c7);
+}
+
 .table-container{
     background:white;
     border-radius:16px;
@@ -89,7 +101,6 @@ th{
     background:#1e293b;
     color:white;
     font-weight:700;
-    letter-spacing:.3px;
     padding:8px 5px;
     text-align:left;
 }
@@ -119,7 +130,6 @@ tbody tr:hover{
     font-weight:700;
 }
 
-/* Pelaajasarake */
 th:first-child,
 td:first-child{
     max-width:95px;
@@ -128,34 +138,9 @@ td:first-child{
     white-space:nowrap;
 }
 
-/* Mobiili */
 @media (max-width:600px){
-
-    body{
-        padding:6px;
-    }
-
-    table{
-        font-size:11px;
-    }
-
-    th, td{
-        padding:6px 3px;
-    }
-
-    th:first-child,
-    td:first-child{
-        max-width:70px;
-    }
-
-    h1{
-        font-size:24px;
-    }
-
-    button{
-        font-size:11px;
-        padding:8px 4px;
-    }
+    table{ font-size:11px; }
+    th, td{ padding:6px 3px; }
 }
 </style>
 </head>
@@ -163,8 +148,14 @@ td:first-child{
 <body>
 
 <h1>🏆 Pelaajatilastot</h1>
-<div class="subtitle">Google Sheetsistä päivittyvät tilastot</div>
+<div class="subtitle">Google Sheets kausittain</div>
 <div id="updated"></div>
+
+<!-- KAUSIVALINTA -->
+<div class="season-buttons">
+    <button onclick="loadSheet(0)">🏆 Kausi 1</button>
+    <button onclick="loadSheet(123456789)">📅 Kausi 2</button>
+</div>
 
 <div class="button-grid">
     <button onclick="sortData(1,'desc')">Ottelut ↓</button>
@@ -176,11 +167,11 @@ td:first-child{
     <button onclick="sortData(3,'desc')">Maalit ↓</button>
     <button onclick="sortData(3,'asc')">Maalit ↑</button>
 
-    <button onclick="sortData(4,'desc')">Paras GPG</button>
-    <button onclick="sortData(4,'asc')">Pienin GPG</button>
+    <button onclick="sortData(4,'desc')">GPG</button>
+    <button onclick="sortData(4,'asc')">GPG ↑</button>
 
-    <button onclick="sortData(5,'desc')">Paras V%</button>
-    <button onclick="sortData(5,'asc')">Pienin V%</button>
+    <button onclick="sortData(5,'desc')">V%</button>
+    <button onclick="sortData(5,'asc')">V% ↑</button>
 
     <button onclick="sortData(6,'desc')" class="full-width">
         Päästetyt maalit
@@ -188,35 +179,54 @@ td:first-child{
 </div>
 
 <div class="table-container">
-    <div id="loading" class="loading">
-        Ladataan tilastoja...
-    </div>
+    <div id="loading" class="loading">Ladataan tilastoja...</div>
 
     <table id="statsTable" style="display:none;">
         <thead>
-            <tr>
-                <th>Pelaaja</th>
-                <th>O</th>
-                <th>V</th>
-                <th>M</th>
-                <th>GPG</th>
-                <th>V%</th>
-                <th>GA</th>
-                <th>GAA</th>
-            </tr>
+        <tr>
+            <th>Pelaaja</th>
+            <th>O</th>
+            <th>V</th>
+            <th>M</th>
+            <th>GPG</th>
+            <th>V%</th>
+            <th>GA</th>
+            <th>GAA</th>
+        </tr>
         </thead>
         <tbody id="tableBody"></tbody>
     </table>
 </div>
 
 <script>
+
 const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
 
 let tableData = [];
 let activeColumn = null;
+let currentGid = 0;
 
 document.getElementById("updated").textContent =
     "Päivitetty: " + new Date().toLocaleString("fi-FI");
+
+function loadSheet(gid){
+
+    currentGid = gid;
+
+    document.getElementById('loading').style.display = 'block';
+    document.getElementById('statsTable').style.display = 'none';
+
+    const oldScript = document.getElementById('sheetScript');
+    if(oldScript) oldScript.remove();
+
+    const script = document.createElement('script');
+    script.id = 'sheetScript';
+
+    script.src =
+    `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=${gid}`;
+
+    document.body.appendChild(script);
+}
 
 function koodiMestari(data){
 
@@ -240,10 +250,8 @@ function koodiMestari(data){
 
         }).filter(row=>row.length>0);
 
-        if(
-            rawData.length>0 &&
-            rawData[0][0].toString().toLowerCase().includes('pelaaja')
-        ){
+        if(rawData.length>0 &&
+           rawData[0][0].toString().toLowerCase().includes('pelaaja')){
             rawData.shift();
         }
 
@@ -254,22 +262,17 @@ function koodiMestari(data){
 
         renderTable(tableData);
 
-    }catch(error){
-        console.error(error);
+    }catch(e){
+        console.error(e);
     }
 }
-
-const script = document.createElement('script');
-script.src =
-`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
-document.body.appendChild(script);
 
 function renderTable(data){
 
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML='';
 
-    data.forEach((row)=>{
+    data.forEach(row=>{
 
         const tr = document.createElement('tr');
 
@@ -322,6 +325,9 @@ function sortData(columnIndex,direction){
 
     renderTable(tableData);
 }
+
+loadSheet(0);
+
 </script>
 
 </body>
