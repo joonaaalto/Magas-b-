@@ -18,14 +18,14 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* JOKA TOINEN RIVI ON VALKOINEN JA JOKA TOINEN VAALEANHARMAA */
-        tr { background-color: #ffffff; }
+        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* KORJATTU TYYLI: TÄMÄ PAKOTTAA VALITUN PYSTYRIVIN TAUSTAVÄRIN NÄKYVIIN RAIDASTA RIIPPUMATTA */
+        /* TÄMÄ TYYLI VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN NUMEROT RAIDASTA RIIPPUMATTA */
         .active-sort td:nth-child(var(--active-col)) {
             background-color: #bae6fd !important;
             font-weight: bold;
+            color: #000;
         }
         
         tr:last-child td { border-bottom: none; }
@@ -170,7 +170,7 @@ html<!DOCTYPE html>
                 }
             });
             
-            // KYTKETÄÄN LIHAVOINTI PÄÄLLE VALITULLE SARAKKEELLE
+            // AKTIVOIDAAN KOROSTUS TÄSTÄ ILMAN KOODIMUUTOKSIA
             const table = document.getElementById('statsTable');
             table.classList.add('active-sort');
             table.style.setProperty('--active-col', columnIndex + 1);
