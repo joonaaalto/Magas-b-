@@ -11,7 +11,7 @@ body{
     background:linear-gradient(180deg,#eef2f7 0%,#dfe7f1 100%);
     color:#333;
     margin:0;
-    padding:15px;
+    padding:10px;
     min-height:100vh;
 }
 
@@ -40,7 +40,7 @@ h1{
 .button-grid{
     display:grid;
     grid-template-columns:repeat(2,1fr);
-    gap:10px;
+    gap:8px;
     margin-bottom:18px;
 }
 
@@ -48,12 +48,12 @@ button{
     background:linear-gradient(135deg,#2196f3,#1565c0);
     color:white;
     border:none;
-    padding:12px;
-    font-size:14px;
+    padding:10px;
+    font-size:13px;
     font-weight:700;
     border-radius:12px;
     cursor:pointer;
-    transition:all .2s ease;
+    transition:.2s;
     box-shadow:0 3px 8px rgba(0,0,0,.12);
 }
 
@@ -82,20 +82,20 @@ button:active{
 table{
     width:100%;
     border-collapse:collapse;
-    font-size:14px;
+    font-size:13px;
 }
 
 th{
     background:#1e293b;
     color:white;
     font-weight:700;
-    letter-spacing:.5px;
-    padding:12px;
+    letter-spacing:.3px;
+    padding:8px 5px;
     text-align:left;
 }
 
 td{
-    padding:11px 12px;
+    padding:7px 5px;
     border-bottom:1px solid #eceff3;
 }
 
@@ -103,16 +103,8 @@ tbody tr:nth-child(even){
     background:#f8fafc;
 }
 
-tbody tr{
-    transition:background-color .15s ease;
-}
-
 tbody tr:hover{
     background:#eef6ff !important;
-}
-
-tr:last-child td{
-    border-bottom:none;
 }
 
 .loading{
@@ -124,7 +116,6 @@ tr:last-child td{
 
 .highlight-column{
     background:#dbeafe !important;
-    color:#0f172a;
     font-weight:700;
 }
 
@@ -141,6 +132,49 @@ tr:last-child td{
 .rank3{
     color:#b45309;
     font-weight:800;
+}
+
+/* Pelaajasarake kapeammaksi */
+th:first-child,
+td:first-child{
+    max-width:95px;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+}
+
+/* Mobiili */
+@media (max-width:600px){
+
+    body{
+        padding:6px;
+    }
+
+    table{
+        font-size:11px;
+    }
+
+    th{
+        padding:6px 3px;
+    }
+
+    td{
+        padding:6px 3px;
+    }
+
+    th:first-child,
+    td:first-child{
+        max-width:70px;
+    }
+
+    h1{
+        font-size:24px;
+    }
+
+    button{
+        font-size:11px;
+        padding:8px 4px;
+    }
 }
 </style>
 </head>
@@ -164,8 +198,8 @@ tr:last-child td{
     <button onclick="sortData(4,'desc')">Paras GPG</button>
     <button onclick="sortData(4,'asc')">Pienin GPG</button>
 
-    <button onclick="sortData(5,'desc')">Paras Voitto%</button>
-    <button onclick="sortData(5,'asc')">Pienin Voitto%</button>
+    <button onclick="sortData(5,'desc')">Paras V%</button>
+    <button onclick="sortData(5,'asc')">Pienin V%</button>
 
     <button onclick="sortData(6,'desc')" class="full-width">
         Päästetyt maalit
@@ -201,10 +235,10 @@ let tableData = [];
 let activeColumn = null;
 
 document.getElementById("updated").textContent =
-    "Päivitetty: " +
-    new Date().toLocaleString("fi-FI");
+    "Päivitetty: " + new Date().toLocaleString("fi-FI");
 
 function koodiMestari(data){
+
     try{
 
         if(!data || !data.table || !data.table.rows){
@@ -223,10 +257,10 @@ function koodiMestari(data){
                 return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
             });
 
-        }).filter(row=>row.length>0);
+        }).filter(row=>row.length > 0);
 
         if(
-            rawData.length>0 &&
+            rawData.length > 0 &&
             rawData[0][0].toString().toLowerCase().includes('pelaaja')
         ){
             rawData.shift();
@@ -234,31 +268,19 @@ function koodiMestari(data){
 
         tableData = rawData;
 
-        if(tableData.length===0){
-            document.getElementById('loading').innerText =
-            'Pelaajatietoja ei löytynyt.';
-            return;
-        }
-
         document.getElementById('loading').style.display='none';
         document.getElementById('statsTable').style.display='table';
 
         renderTable(tableData);
 
     }catch(error){
-
-        document.getElementById('loading').innerText =
-        'Virhe tietojen tulkinnassa.';
-
         console.error(error);
     }
 }
 
 const script = document.createElement('script');
-
 script.src =
 `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
-
 document.body.appendChild(script);
 
 function renderTable(data){
@@ -288,49 +310,19 @@ function renderTable(data){
         let medal = '';
         let rankClass = '';
 
-        if(index===0){
-            medal='🥇 ';
-            rankClass='rank1';
-        }else if(index===1){
-            medal='🥈 ';
-            rankClass='rank2';
-        }else if(index===2){
-            medal='🥉 ';
-            rankClass='rank3';
-        }
+        if(index===0){ medal='🥇 '; rankClass='rank1'; }
+        else if(index===1){ medal='🥈 '; rankClass='rank2'; }
+        else if(index===2){ medal='🥉 '; rankClass='rank3'; }
 
         tr.innerHTML = `
-            <td class="${activeColumn===0?'highlight-column':''} ${rankClass}">
-                <b>${medal}${name}</b>
-            </td>
-
-            <td class="${activeColumn===1?'highlight-column':''}">
-                ${o}
-            </td>
-
-            <td class="${activeColumn===2?'highlight-column':''}">
-                ${v}
-            </td>
-
-            <td class="${activeColumn===3?'highlight-column':''}">
-                ${m}
-            </td>
-
-            <td class="${activeColumn===4?'highlight-column':''}">
-                ${gpg}
-            </td>
-
-            <td class="${activeColumn===5?'highlight-column':''}">
-                ${vpct}
-            </td>
-
-            <td class="${activeColumn===6?'highlight-column':''}">
-                ${ga}
-            </td>
-
-            <td class="${activeColumn===7?'highlight-column':''}">
-                ${gaa}
-            </td>
+            <td class="${activeColumn===0?'highlight-column':''} ${rankClass}"><b>${medal}${name}</b></td>
+            <td class="${activeColumn===1?'highlight-column':''}">${o}</td>
+            <td class="${activeColumn===2?'highlight-column':''}">${v}</td>
+            <td class="${activeColumn===3?'highlight-column':''}">${m}</td>
+            <td class="${activeColumn===4?'highlight-column':''}">${gpg}</td>
+            <td class="${activeColumn===5?'highlight-column':''}">${vpct}</td>
+            <td class="${activeColumn===6?'highlight-column':''}">${ga}</td>
+            <td class="${activeColumn===7?'highlight-column':''}">${gaa}</td>
         `;
 
         tbody.appendChild(tr);
@@ -346,21 +338,12 @@ function sortData(columnIndex,direction){
         let valA=(a[columnIndex]||'0').toString();
         let valB=(b[columnIndex]||'0').toString();
 
-        let numA=
-            parseFloat(
-                valA.replace(',','.').replace('%','')
-            ) || 0;
+        let numA=parseFloat(valA.replace(',','.').replace('%','')) || 0;
+        let numB=parseFloat(valB.replace(',','.').replace('%','')) || 0;
 
-        let numB=
-            parseFloat(
-                valB.replace(',','.').replace('%','')
-            ) || 0;
-
-        if(direction==='asc'){
-            return numA > numB ? 1 : -1;
-        }else{
-            return numA < numB ? 1 : -1;
-        }
+        return direction==='asc'
+            ? (numA > numB ? 1 : -1)
+            : (numA < numB ? 1 : -1);
     });
 
     renderTable(tableData);
