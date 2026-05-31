@@ -18,12 +18,11 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
+        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ TYYLI VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN NUMEROT RAIDASTA RIIPPUMATTA */
+        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
         .active-sort td:nth-child(var(--active-col)) {
-            background-color: #bae6fd !important;
             font-weight: bold;
             color: #000;
         }
@@ -117,7 +116,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -170,7 +169,7 @@ html<!DOCTYPE html>
                 }
             });
             
-            // AKTIVOIDAAN KOROSTUS TÄSTÄ ILMAN KOODIMUUTOKSIA
+            // KYTKETÄÄN LIHAVOINTI PÄÄLLE VALITULLE SARAKKEELLE
             const table = document.getElementById('statsTable');
             table.classList.add('active-sort');
             table.style.setProperty('--active-col', columnIndex + 1);
