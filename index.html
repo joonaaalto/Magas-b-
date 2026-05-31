@@ -18,11 +18,16 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
+        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ TYYLI VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN NUMEROT RAIDASTA RIIPPUMATTA */
-        .active-sort td:nth-child(var(--active-col)) {
+        /* TÄMÄ CSS-KIKKA VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN AUTOMAATTISESTI ILMAN SCRIPT-MUUTOKSIA */
+        .show-col-1 td:nth-child(2),
+        .show-col-2 td:nth-child(3),
+        .show-col-3 td:nth-child(4),
+        .show-col-4 td:nth-child(5),
+        .show-col-5 td:nth-child(6),
+        .show-col-6 td:nth-child(7) {
             background-color: #e0f2fe !important;
             font-weight: bold;
             color: #000;
@@ -37,18 +42,18 @@ html<!DOCTYPE html>
     <h1>🏆 Pelaajatilastot</h1>
 
     <div class="button-grid">
-        <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
-        <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
-        <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
-        <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
-        <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
-        <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
-        <button onclick="sortData(4, 'desc')">Paras GPG</button>
-        <button onclick="sortData(4, 'asc')">Pienin GPG</button>
-        <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
-        <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <button onclick="sortData(1, 'desc'); document.getElementById('statsTable').className='show-col-1'">Ottelut (Isoin ensin)</button>
+        <button onclick="sortData(1, 'asc'); document.getElementById('statsTable').className='show-col-1'">Ottelut (Pienin ensin)</button>
+        <button onclick="sortData(2, 'desc'); document.getElementById('statsTable').className='show-col-2'">Voitot (Isoin ensin)</button>
+        <button onclick="sortData(2, 'asc'); document.getElementById('statsTable').className='show-col-2'">Voitot (Pienin ensin)</button>
+        <button onclick="sortData(3, 'desc'); document.getElementById('statsTable').className='show-col-3'">Maalit (Isoin ensin)</button>
+        <button onclick="sortData(3, 'asc'); document.getElementById('statsTable').className='show-col-3'">Maalit (Pienin ensin)</button>
+        <button onclick="sortData(4, 'desc'); document.getElementById('statsTable').className='show-col-4'">Paras GPG</button>
+        <button onclick="sortData(4, 'asc'); document.getElementById('statsTable').className='show-col-4'">Pienin GPG</button>
+        <button onclick="sortData(5, 'desc'); document.getElementById('statsTable').className='show-col-5'">Paras Voitto%</button>
+        <button onclick="sortData(5, 'asc'); document.getElementById('statsTable').className='show-col-5'">Pienin Voitto%</button>
         <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
-        <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
+        <button onclick="sortData(6, 'desc'); document.getElementById('statsTable').className='show-col-6'" class="full-width">Päästetyt maalit</button>
     </div>
 
     <div class="table-container">
@@ -169,12 +174,6 @@ html<!DOCTYPE html>
                     return numA < numB ? 1 : -1;
                 }
             });
-
-            // AKTIVOIDAAN KOROSTUS JA LIHAVOINTI VALITULLE SARAKKEELLE CSS-MUUTTUJAN AVULLA
-            const table = document.getElementById('statsTable');
-            table.classList.add('active-sort');
-            table.style.setProperty('--active-col', columnIndex + 1);
-
             renderTable(tableData);
         }
     </script>
