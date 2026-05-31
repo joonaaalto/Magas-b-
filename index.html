@@ -1,133 +1,181 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pelaajatilastot</title>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: #f4f6f9;
-            color: #333;
-            margin: 0;
-            padding: 10px;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pelaajatilastot</title>
 
-        h1 {
-            text-align: center;
-            font-size: 24px;
-            margin-bottom: 15px;
-            color: #1a1a1a;
-        }
+<style>
+body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:linear-gradient(180deg,#eef2f7 0%,#dfe7f1 100%);
+    color:#333;
+    margin:0;
+    padding:15px;
+    min-height:100vh;
+}
 
-        .button-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 15px;
-        }
+h1{
+    text-align:center;
+    font-size:30px;
+    font-weight:800;
+    margin-bottom:5px;
+    color:#1c2733;
+}
 
-        button {
-            background-color: #007bff;
-            color: white;
-            border: none;
-            padding: 12px 8px;
-            font-size: 14px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
-            -webkit-tap-highlight-color: transparent;
-        }
+.subtitle{
+    text-align:center;
+    color:#64748b;
+    font-size:14px;
+    margin-bottom:5px;
+}
 
-        button:active {
-            background-color: #0056b3;
-        }
+#updated{
+    text-align:center;
+    color:#64748b;
+    font-size:12px;
+    margin-bottom:18px;
+}
 
-        .full-width {
-            grid-column: span 2;
-            background-color: #dc3545;
-        }
+.button-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    margin-bottom:18px;
+}
 
-        .full-width:active {
-            background-color: #bd2130;
-        }
+button{
+    background:linear-gradient(135deg,#2196f3,#1565c0);
+    color:white;
+    border:none;
+    padding:12px;
+    font-size:14px;
+    font-weight:700;
+    border-radius:12px;
+    cursor:pointer;
+    transition:all .2s ease;
+    box-shadow:0 3px 8px rgba(0,0,0,.12);
+}
 
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            overflow-x: auto;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
+button:hover{
+    transform:translateY(-2px);
+}
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            text-align: left;
-            font-size: 14px;
-        }
+button:active{
+    transform:scale(.97);
+}
 
-        th, td {
-            padding: 10px 12px;
-            border-bottom: 1px solid #eeeeee;
-            white-space: nowrap;
-        }
+.full-width{
+    grid-column:span 2;
+    background:linear-gradient(135deg,#ef4444,#dc2626);
+}
 
-        th {
-            background-color: #f8f9fa;
-            font-weight: bold;
-            color: #666;
-        }
+.table-container{
+    background:white;
+    border-radius:16px;
+    overflow:hidden;
+    box-shadow:
+        0 8px 24px rgba(0,0,0,.08),
+        0 2px 6px rgba(0,0,0,.04);
+}
 
-        /* Joka toinen rivi vaaleanharmaa */
-        tr:nth-child(even) {
-            background-color: #eaedf2;
-        }
+table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:14px;
+}
 
-        tr:last-child td {
-            border-bottom: none;
-        }
+th{
+    background:#1e293b;
+    color:white;
+    font-weight:700;
+    letter-spacing:.5px;
+    padding:12px;
+    text-align:left;
+}
 
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-weight: bold;
-            color: #666;
-        }
+td{
+    padding:11px 12px;
+    border-bottom:1px solid #eceff3;
+}
 
-        /* Korostettu sarake */
-        .highlight-column {
-            background-color: #ffe082 !important;
-            font-weight: bold;
-        }
-    </style>
+tbody tr:nth-child(even){
+    background:#f8fafc;
+}
+
+tbody tr{
+    transition:background-color .15s ease;
+}
+
+tbody tr:hover{
+    background:#eef6ff !important;
+}
+
+tr:last-child td{
+    border-bottom:none;
+}
+
+.loading{
+    text-align:center;
+    padding:20px;
+    font-weight:bold;
+    color:#666;
+}
+
+.highlight-column{
+    background:#dbeafe !important;
+    color:#0f172a;
+    font-weight:700;
+}
+
+.rank1{
+    color:#b8860b;
+    font-weight:800;
+}
+
+.rank2{
+    color:#6b7280;
+    font-weight:800;
+}
+
+.rank3{
+    color:#b45309;
+    font-weight:800;
+}
+</style>
 </head>
+
 <body>
 
 <h1>🏆 Pelaajatilastot</h1>
+<div class="subtitle">Google Sheetsistä päivittyvät tilastot</div>
+<div id="updated"></div>
 
 <div class="button-grid">
-    <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
-    <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
+    <button onclick="sortData(1,'desc')">Ottelut ↓</button>
+    <button onclick="sortData(1,'asc')">Ottelut ↑</button>
 
-    <button onclick="sortData(2, 'desc')">Voitot (Isoin ensin)</button>
-    <button onclick="sortData(2, 'asc')">Voitot (Pienin ensin)</button>
+    <button onclick="sortData(2,'desc')">Voitot ↓</button>
+    <button onclick="sortData(2,'asc')">Voitot ↑</button>
 
-    <button onclick="sortData(3, 'desc')">Maalit (Isoin ensin)</button>
-    <button onclick="sortData(3, 'asc')">Maalit (Pienin ensin)</button>
+    <button onclick="sortData(3,'desc')">Maalit ↓</button>
+    <button onclick="sortData(3,'asc')">Maalit ↑</button>
 
-    <button onclick="sortData(4, 'desc')">Paras GPG</button>
-    <button onclick="sortData(4, 'asc')">Pienin GPG</button>
+    <button onclick="sortData(4,'desc')">Paras GPG</button>
+    <button onclick="sortData(4,'asc')">Pienin GPG</button>
 
-    <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
-    <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+    <button onclick="sortData(5,'desc')">Paras Voitto%</button>
+    <button onclick="sortData(5,'asc')">Pienin Voitto%</button>
 
-    <button onclick="sortData(6, 'desc')" class="full-width">
+    <button onclick="sortData(6,'desc')" class="full-width">
         Päästetyt maalit
     </button>
 </div>
 
 <div class="table-container">
-    <div id="loading" class="loading">Ladataan tilastoja...</div>
+    <div id="loading" class="loading">
+        Ladataan tilastoja...
+    </div>
 
     <table id="statsTable" style="display:none;">
         <thead>
@@ -147,147 +195,176 @@
 </div>
 
 <script>
-    const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
+const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
 
-    let tableData = [];
-    let activeColumn = null;
+let tableData = [];
+let activeColumn = null;
 
-    function koodiMestari(data) {
-        try {
-            if (!data || !data.table || !data.table.rows) {
-                document.getElementById('loading').innerText =
-                    'Virhe tiedon rakenteessa. Varmista taulukko.';
-                return;
-            }
+document.getElementById("updated").textContent =
+    "Päivitetty: " +
+    new Date().toLocaleString("fi-FI");
 
-            const rows = data.table.rows;
+function koodiMestari(data){
+    try{
 
-            let rawData = rows.map(row => {
-                if (!row || !row.c) return [];
-
-                return row.c.map(cell => {
-                    if (!cell) return '';
-                    return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
-                });
-            }).filter(row => row.length > 0);
-
-            if (
-                rawData.length > 0 &&
-                rawData[0][0].toString().toLowerCase().includes('pelaaja')
-            ) {
-                rawData.shift();
-            }
-
-            tableData = rawData;
-
-            if (tableData.length === 0) {
-                document.getElementById('loading').innerText =
-                    'Pelaajatietoja ei löytynyt.';
-                return;
-            }
-
-            document.getElementById('loading').style.display = 'none';
-            document.getElementById('statsTable').style.display = 'table';
-
-            renderTable(tableData);
-
-        } catch (error) {
+        if(!data || !data.table || !data.table.rows){
             document.getElementById('loading').innerText =
-                'Virhe tietojen tulkinnassa.';
-            console.error(error);
+            'Virhe tiedon rakenteessa.';
+            return;
         }
-    }
 
-    const script = document.createElement('script');
-    script.src =
-        `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        const rows = data.table.rows;
 
-    document.body.appendChild(script);
+        let rawData = rows.map(row=>{
+            if(!row || !row.c) return [];
 
-    function renderTable(data) {
-        const tbody = document.getElementById('tableBody');
-        tbody.innerHTML = '';
+            return row.c.map(cell=>{
+                if(!cell) return '';
+                return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
+            });
 
-        data.forEach(row => {
+        }).filter(row=>row.length>0);
 
-            const tr = document.createElement('tr');
+        if(
+            rawData.length>0 &&
+            rawData[0][0].toString().toLowerCase().includes('pelaaja')
+        ){
+            rawData.shift();
+        }
 
-            const name = row[0] || '';
-            const o = row[1] || '0';
-            const v = row[2] || '0';
-            const m = row[3] || '0';
+        tableData = rawData;
 
-            let gpg = row[4] || '';
-            let vPct = row[5] || '';
-            const ga = row[6] || '0';
-            let gaa = row[7] || '';
+        if(tableData.length===0){
+            document.getElementById('loading').innerText =
+            'Pelaajatietoja ei löytynyt.';
+            return;
+        }
 
-            if (gpg == '0' || gpg == '0.00') gpg = '';
-            if (gaa == '0' || gaa == '0.00') gaa = '';
-            if (vPct == '0' || vPct == '0%') vPct = '';
-
-            tr.innerHTML = `
-                <td class="${activeColumn === 0 ? 'highlight-column' : ''}">
-                    <b>${name}</b>
-                </td>
-
-                <td class="${activeColumn === 1 ? 'highlight-column' : ''}">
-                    ${o}
-                </td>
-
-                <td class="${activeColumn === 2 ? 'highlight-column' : ''}">
-                    ${v}
-                </td>
-
-                <td class="${activeColumn === 3 ? 'highlight-column' : ''}">
-                    ${m}
-                </td>
-
-                <td class="${activeColumn === 4 ? 'highlight-column' : ''}">
-                    ${gpg}
-                </td>
-
-                <td class="${activeColumn === 5 ? 'highlight-column' : ''}">
-                    ${vPct}
-                </td>
-
-                <td class="${activeColumn === 6 ? 'highlight-column' : ''}">
-                    ${ga}
-                </td>
-
-                <td class="${activeColumn === 7 ? 'highlight-column' : ''}">
-                    ${gaa}
-                </td>
-            `;
-
-            tbody.appendChild(tr);
-        });
-    }
-
-    function sortData(columnIndex, direction) {
-
-        activeColumn = columnIndex;
-
-        tableData.sort((a, b) => {
-
-            let valA = (a[columnIndex] || '0').toString();
-            let valB = (b[columnIndex] || '0').toString();
-
-            let numA =
-                parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
-
-            let numB =
-                parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
-
-            if (direction === 'asc') {
-                return numA > numB ? 1 : -1;
-            } else {
-                return numA < numB ? 1 : -1;
-            }
-        });
+        document.getElementById('loading').style.display='none';
+        document.getElementById('statsTable').style.display='table';
 
         renderTable(tableData);
+
+    }catch(error){
+
+        document.getElementById('loading').innerText =
+        'Virhe tietojen tulkinnassa.';
+
+        console.error(error);
     }
+}
+
+const script = document.createElement('script');
+
+script.src =
+`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+
+document.body.appendChild(script);
+
+function renderTable(data){
+
+    const tbody = document.getElementById('tableBody');
+    tbody.innerHTML='';
+
+    data.forEach((row,index)=>{
+
+        const tr = document.createElement('tr');
+
+        const name = row[0] || '';
+        const o = row[1] || '0';
+        const v = row[2] || '0';
+        const m = row[3] || '0';
+
+        let gpg = row[4] || '';
+        let vpct = row[5] || '';
+
+        const ga = row[6] || '0';
+        let gaa = row[7] || '';
+
+        if(gpg=='0' || gpg=='0.00') gpg='';
+        if(gaa=='0' || gaa=='0.00') gaa='';
+        if(vpct=='0' || vpct=='0%') vpct='';
+
+        let medal = '';
+        let rankClass = '';
+
+        if(index===0){
+            medal='🥇 ';
+            rankClass='rank1';
+        }else if(index===1){
+            medal='🥈 ';
+            rankClass='rank2';
+        }else if(index===2){
+            medal='🥉 ';
+            rankClass='rank3';
+        }
+
+        tr.innerHTML = `
+            <td class="${activeColumn===0?'highlight-column':''} ${rankClass}">
+                <b>${medal}${name}</b>
+            </td>
+
+            <td class="${activeColumn===1?'highlight-column':''}">
+                ${o}
+            </td>
+
+            <td class="${activeColumn===2?'highlight-column':''}">
+                ${v}
+            </td>
+
+            <td class="${activeColumn===3?'highlight-column':''}">
+                ${m}
+            </td>
+
+            <td class="${activeColumn===4?'highlight-column':''}">
+                ${gpg}
+            </td>
+
+            <td class="${activeColumn===5?'highlight-column':''}">
+                ${vpct}
+            </td>
+
+            <td class="${activeColumn===6?'highlight-column':''}">
+                ${ga}
+            </td>
+
+            <td class="${activeColumn===7?'highlight-column':''}">
+                ${gaa}
+            </td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+function sortData(columnIndex,direction){
+
+    activeColumn = columnIndex;
+
+    tableData.sort((a,b)=>{
+
+        let valA=(a[columnIndex]||'0').toString();
+        let valB=(b[columnIndex]||'0').toString();
+
+        let numA=
+            parseFloat(
+                valA.replace(',','.').replace('%','')
+            ) || 0;
+
+        let numB=
+            parseFloat(
+                valB.replace(',','.').replace('%','')
+            ) || 0;
+
+        if(direction==='asc'){
+            return numA > numB ? 1 : -1;
+        }else{
+            return numA < numB ? 1 : -1;
+        }
+    });
+
+    renderTable(tableData);
+}
 </script>
 
 </body>
