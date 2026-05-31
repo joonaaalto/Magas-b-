@@ -35,6 +35,7 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <!-- Tässä on se uusi iso painike, ja muut GA/GAA napat on poistettu -->
         <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
@@ -59,33 +60,36 @@ html<!DOCTYPE html>
 
     <script>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
+        const url = `https://google.com{sheetId}/pub?gid=0&output=csv`;
+
         let tableData = [];
 
-        function koodiMestari(data) {
+        async function loadStats() {
             try {
-                if (!data || !data.table || !data.table.rows) {
-                    document.getElementById('loading').innerText = 'Virhe tiedon rakenteessa. Varmista taulukko.';
-                    return;
-                }
-
-                const rows = data.table.rows;
+                const response = await fetch(url);
+                if (!response.ok) throw new Error('Verkkovirhe');
+                const csvText = await response.text();
                 
-                let rawData = rows.map(row => {
-                    if (!row || !row.c) return [];
-                    return row.c.map(cell => {
-                        if (!cell || cell.v === null) return '';
-                        return cell.f ? cell.f : cell.v;
-                    });
-                }).filter(row => row.length > 0);
+                const cleanText = csvText.replace(/\r/g, '');
+                const lines = cleanText.split('\n');
+                tableData = [];
 
-                if (rawData.length > 0 && rawData[0].length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
-                    rawData.shift();
+                // Aloitetaan riviltä 2 (i = 1), eli ohitetaan otsikot
+                for (let i = 1; i < lines.length; i++) {
+                    let currentLine = lines[i].trim();
+                    if (!currentLine) continue;
+                    
+                    // Suomalainen Sheets käyttää puolipistettä sarakkeiden erottamiseen
+                    const row = currentLine.split(';').map(cell => cell.replace(/^"|"$/g, '').trim());
+                    
+                    // Otetaan mukaan vain rivit, joissa on jotain tietoa
+                    if (row && row[0] !== '') {
+                        tableData.push(row);
+                    }
                 }
-
-                tableData = rawData;
 
                 if (tableData.length === 0) {
-                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt.';
+                    document.getElementById('loading').innerText = 'Taulukko luettiin, mutta pelaajatietoja ei löytynyt.';
                     return;
                 }
 
@@ -94,14 +98,10 @@ html<!DOCTYPE html>
                 
                 renderTable(tableData);
             } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa.';
+                document.getElementById('loading').innerText = 'Virhe ladattaessa tietoja. Varmista, että Sheets on julkaistu verkkoon.';
                 console.error(error);
             }
         }
-
-        const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
-        document.body.appendChild(script);
 
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
@@ -110,18 +110,14 @@ html<!DOCTYPE html>
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                let name = row[0] !== undefined ? row[0] : '';
-                let o = row[1] !== undefined ? row[1] : '0';
-                let v = row[2] !== undefined ? row[2] : '0';
-                let m = row[3] !== undefined ? row[3] : '0';
-                let gpg = row[4] !== undefined ? row[4] : '';
-                let vPct = row[5] !== undefined ? row[5] : '';
-                let ga = row[6] !== undefined ? row[6] : '0';
-                let gaa = row[7] !== undefined ? row[7] : '';
-
-                if (gpg == '0' || gpg == '0.00') gpg = '';
-                if (gaa == '0' || gaa == '0.00') gaa = '';
-                if (vPct == '0' || vPct == '0%') vPct = '';
+                const name = row[0] || '';
+                const o = row[1] || '0';
+                const v = row[2] || '0';
+                const m = row[3] || '0';
+                const gpg = row[4] || '';
+                const vPct = row[5] || '';
+                const ga = row[6] || '0';
+                const gaa = row[7] || '';
 
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
@@ -139,8 +135,8 @@ html<!DOCTYPE html>
 
         function sortData(columnIndex, direction) {
             tableData.sort((a, b) => {
-                let valA = a[columnIndex] !== undefined ? a[columnIndex].toString() : '0';
-                let valB = b[columnIndex] !== undefined ? b[columnIndex].toString() : '0';
+                let valA = a[columnIndex] || '0';
+                let valB = b[columnIndex] || '0';
 
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
@@ -153,6 +149,8 @@ html<!DOCTYPE html>
             });
             renderTable(tableData);
         }
+
+        window.onload = loadStats;
     </script>
 </body>
 </html>
