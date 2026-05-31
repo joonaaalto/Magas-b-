@@ -3,8 +3,9 @@ html<!DOCTYPE html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🏆 Pelaajatilastot</title>
+    <title>Pelaajatilastot</title>
     <style>
+        /* TÄSSÄ ON UUSI TUMMA JA TYYLIKÄS ULKOASU */
         :root {
             --bg-color: #121824;
             --card-bg: #1e293b;
@@ -15,16 +16,14 @@ html<!DOCTYPE html>
             --danger-hover: #dc2626;
             --border: #334155;
         }
-        
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
             background-color: var(--bg-color); 
             color: var(--text-main); 
             margin: 0; 
-            padding: 12px;
+            padding: 10px; 
             -webkit-font-smoothing: antialiased;
         }
-        
         h1 { 
             text-align: center; 
             font-size: 26px; 
@@ -35,28 +34,17 @@ html<!DOCTYPE html>
             letter-spacing: 1px;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
-        
-        .button-section-title {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-muted);
-            margin: 10px 0 4px 2px;
-            font-weight: 700;
-        }
-
         .button-grid { 
             display: grid; 
             grid-template-columns: repeat(2, 1fr); 
             gap: 6px; 
-            margin-bottom: 20px; 
+            margin-bottom: 15px; 
             background: var(--card-bg);
-            padding: 10px;
+            padding: 8px;
             border-radius: 12px;
             border: 1px solid var(--border);
             box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
         }
-        
         button { 
             background-color: #2e3b4e; 
             color: var(--text-main); 
@@ -69,13 +57,11 @@ html<!DOCTYPE html>
             transition: all 0.15s ease;
             -webkit-tap-highlight-color: transparent; 
         }
-        
         button:active { 
             background-color: var(--primary);
             border-color: var(--primary);
             transform: scale(0.98);
         }
-        
         .full-width { 
             grid-column: span 2; 
             background-color: var(--danger); 
@@ -84,11 +70,9 @@ html<!DOCTYPE html>
             padding: 12px 6px;
             margin-top: 4px;
         }
-        
         .full-width:active { 
             background-color: var(--danger-hover); 
         }
-        
         .table-container { 
             background: var(--card-bg); 
             border-radius: 12px; 
@@ -97,20 +81,17 @@ html<!DOCTYPE html>
             box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
             margin-bottom: 30px;
         }
-        
         table { 
             width: 100%; 
             border-collapse: collapse; 
             text-align: left; 
             font-size: 14px; 
         }
-        
         th, td { 
             padding: 12px 14px; 
             border-bottom: 1px solid var(--border); 
             white-space: nowrap; 
         }
-        
         th { 
             background-color: #151f32; 
             font-weight: 700; 
@@ -122,50 +103,40 @@ html<!DOCTYPE html>
             top: 0;
             z-index: 10;
         }
-        
         tr:nth-child(even) {
             background-color: #243046;
         }
-        
         tr:last-child td { 
             border-bottom: none; 
         }
-        
         td b {
             color: #fff;
             font-size: 15px;
         }
-        
-        .loading { 
-            text-align: center; 
-            padding: 30px; 
-            font-weight: bold; 
-            color: var(--text-muted); 
-            font-size: 16px;
-        }
+        .loading { text-align: center; padding: 20px; font-weight: bold; color: var(--text-muted); }
     </style>
 </head>
 <body>
 
     <h1>🏆 Pelaajatilastot</h1>
 
-    <div class="button-section-title">Järjestä tilastot</div>
     <div class="button-grid">
-        <button onclick="sortData(1, 'desc')">Ottelut ➔ Max</button>
-        <button onclick="sortData(1, 'asc')">Ottelut ➔ Min</button>
-        <button onclick="sortData(2, 'desc')">Voitot ➔ Max</button>
-        <button onclick="sortData(2, 'asc')">Voitot ➔ Min</button>
-        <button onclick="sortData(3, 'desc')">Maalit ➔ Max</button>
-        <button onclick="sortData(3, 'asc')">Maalit ➔ Min</button>
-        <button onclick="sortData(4, 'desc')">GPG ➔ Max</button>
-        <button onclick="sortData(4, 'asc')">GPG ➔ Min</button>
-        <button onclick="sortData(5, 'desc')">Voitto% ➔ Max</button>
-        <button onclick="sortData(5, 'asc')">Voitto% ➔ Min</button>
-        <button onclick="sortData(6, 'desc')" class="full-width">🔥 Järjestä: Päästetyt maalit</button>
+        <button onclick="sortData(1, 'desc')">Ottelut (Isot ensin)</button>
+        <button onclick="sortData(1, 'asc')">Ottelut (Pienet ensin)</button>
+        <button onclick="sortData(2, 'desc')">Voitot (Isot ensin)</button>
+        <button onclick="sortData(2, 'asc')">Voitot (Pienet ensin)</button>
+        <button onclick="sortData(3, 'desc')">Maalit (Isot ensin)</button>
+        <button onclick="sortData(3, 'asc')">Maalit (Pienet ensin)</button>
+        <button onclick="sortData(4, 'desc')">Paras GPG</button>
+        <button onclick="sortData(4, 'asc')">Pienin GPG</button>
+        <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
+        <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
+        <!-- Nimetty uudelleen, muutettu punaiseksi ja poistettu muut GA/GAA napit -->
+        <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
     </div>
 
     <div class="table-container">
-        <div id="loading" class="loading">⏳ Ladataan tilastoja...</div>
+        <div id="loading" class="loading">Ladataan tilastoja...</div>
         <table id="statsTable" style="display:none;">
             <thead>
                 <tr>
@@ -230,7 +201,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
