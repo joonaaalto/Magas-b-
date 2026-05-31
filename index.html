@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+html<!DOCTYPE html>
 <html lang="fi">
 <head>
     <meta charset="UTF-8">
@@ -62,33 +62,41 @@
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
-        // Googlen virallinen käsittelijä, joka lukee datan turvallisesti sisään
-        function callback(data) {
+        // Luetaan Google Sheetsin tarjoama JSONP-datavirta ilman kirjoitusvirheitä
+        function koodiMestari(data) {
             try {
+                if (!data || !data.table || !data.table.rows) {
+                    document.getElementById('loading').innerText = 'Virhe tiedon rakenteessa. Varmista taulukko.';
+                    return;
+                }
+
                 const rows = data.table.rows;
-                
-                // Muutetaan Googlen JSON-rakenne selkeäksi taulukoksi
                 tableData = rows.map(row => {
+                    if (!row || !row.c) return [];
                     return row.c.map(cell => {
                         if (!cell) return '';
                         return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
                     });
-                });
+                }).filter(row => row.length > 0 && row[0] !== ''); // Siivotaan tyhjät rivit
 
-                // Piilotetaan latausteksti ja tuodaan taulukko esiin
+                if (tableData.length === 0) {
+                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt.';
+                    return;
+                }
+
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statsTable').style.display = 'table';
                 
                 renderTable(tableData);
             } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa. Tarkista taulukko.';
+                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa.';
                 console.error(error);
             }
         }
 
-        // Haetaan tiedot käyttämällä JSONP-tekniikkaa, joka ohittaa CORS-suojaukset
+        // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:callback&gid=0`;
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -96,22 +104,19 @@
             tbody.innerHTML = '';
             
             data.forEach(row => {
-                // Otetaan mukaan vain rivit, joilla on pelaajan nimi sarakkeessa A
-                if (!row[0] || row[0].toString().trim().toLowerCase() === 'pelaaja') return;
-
                 const tr = document.createElement('tr');
                 
+                // Haetaan arvot turvallisesti
                 const name = row[0] || '';
                 const o = row[1] || '0';
                 const v = row[2] || '0';
                 const m = row[3] || '0';
-                
                 let gpg = row[4] || '';
                 let vPct = row[5] || '';
                 const ga = row[6] || '0';
                 let gaa = row[7] || '';
 
-                // Siistitään nollat ja tyhjät arvot pois häiritsemästä
+                // Piilotetaan tyhjät tai nollakeskiarvot näkyvistä
                 if (gpg == '0' || gpg == '0.00') gpg = '';
                 if (gaa == '0' || gaa == '0.00') gaa = '';
                 if (vPct == '0' || vPct == '0%') vPct = '';
@@ -135,7 +140,6 @@
                 let valA = (a[columnIndex] || '0').toString();
                 let valB = (b[columnIndex] || '0').toString();
 
-                // Muutetaan tekstit numeroiksi vertailua varten
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
 
