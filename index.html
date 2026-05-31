@@ -18,12 +18,14 @@ html<!DOCTYPE html>
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
         
-        /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
+        /* JOKA TOINEN RIVI ON VALKOINEN JA JOKA TOINEN VAALEANHARMAA */
+        tr { background-color: #ffffff; }
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* MUUTETTU TÄMÄ KOHTA: LIHAVOINNIN SIJASTA VALITTU PYSTYRIVI SAA KEVYEN SINISEN TAUSTAVÄRIN */
+        /* KORJATTU TYYLI: TÄMÄ PAKOTTAA VALITUN PYSTYRIVIN TAUSTAVÄRIN NÄKYVIIN RAIDASTA RIIPPUMATTA */
         .active-sort td:nth-child(var(--active-col)) {
-            background-color: #e0f2fe !important;
+            background-color: #bae6fd !important;
+            font-weight: bold;
         }
         
         tr:last-child td { border-bottom: none; }
@@ -115,7 +117,7 @@ html<!DOCTYPE html>
 
         // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
