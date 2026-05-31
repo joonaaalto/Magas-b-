@@ -21,10 +21,9 @@ html<!DOCTYPE html>
         /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
+        /* MUUTETTU TÄMÄ KOHTA: LIHAVOINNIN SIJASTA VALITTU PYSTYRIVI SAA KEVYEN SINISEN TAUSTAVÄRIN */
         .active-sort td:nth-child(var(--active-col)) {
-            font-weight: bold;
-            color: #000;
+            background-color: #e0f2fe !important;
         }
         
         tr:last-child td { border-bottom: none; }
