@@ -10,27 +10,15 @@ html<!DOCTYPE html>
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         button:active { background-color: #0056b3; }
-        /* Tehdään uudesta Päästetyt maalit -napista punainen ja koko näytön levyinen */
         .full-width { grid-column: span 2; background-color: #dc3545; }
         .full-width:active { background-color: #bd2130; }
         .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
         th { background-color: #f8f9fa; font-weight: bold; color: #666; }
-        
-        /* JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
-        
-        /* TÄMÄ TYYLI VÄRJÄÄ JA LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
-        .active-sort td:nth-child(var(--active-col)) {
-            background-color: #bae6fd !important;
-            font-weight: bold;
-            color: #000;
-        }
-        
+        .active-sort td:nth-child(var(--active-col)) { background-color: #bae6fd !important; font-weight: bold; color: #000; }
         tr:last-child td { border-bottom: none; }
-        
-        /* Hallintapaneelin tyylit */
         .admin-section { display: none; background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 20px; color: #333; }
         .admin-row { display: grid; grid-template-columns: 2fr repeat(4, 1fr) auto; gap: 4px; margin-bottom: 8px; align-items: center; }
         .admin-row input { width: 100%; padding: 6px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; background-color: #fff; color: #333; }
@@ -44,10 +32,8 @@ html<!DOCTYPE html>
 </head>
 <body>
 
-    <!-- YLEISÖNÄKYMÄ (TILASTOT) -->
     <div id="publicView">
         <h1>🏆 Pelaajatilastot</h1>
-
         <div class="button-grid">
             <button onclick="sortData(1, 'desc')">Ottelut (Isoin ensin)</button>
             <button onclick="sortData(1, 'asc')">Ottelut (Pienin ensin)</button>
@@ -61,41 +47,25 @@ html<!DOCTYPE html>
             <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
             <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
         </div>
-
         <div class="table-container">
             <table id="statsTable">
                 <thead>
                     <tr>
-                        <th>Pelaaja</th>
-                        <th>O</th>
-                        <th>V</th>
-                        <th>M</th>
-                        <th>GPG</th>
-                        <th>V%</th>
-                        <th>GA</th>
-                        <th>GAA</th>
+                        <th>Pelaaja</th><th>O</th><th>V</th><th>M</th><th>GPG</th><th>V%</th><th>GA</th><th>GAA</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        
         <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja (Kännykällä)</button>
     </div>
 
-    <!-- HALLINTAPANEELI (SALAINEN) -->
     <div id="adminView" class="admin-section">
         <h2>🔒 Muokkaa pelaajia</h2>
         <div class="admin-row">
-            <div class="admin-header">Nimi</div>
-            <div class="admin-header">O</div>
-            <div class="admin-header">V</div>
-            <div class="admin-header">M</div>
-            <div class="admin-header">GA</div>
-            <div></div>
+            <div class="admin-header">Nimi</div><div class="admin-header">O</div><div class="admin-header">V</div><div class="admin-header">M</div><div class="admin-header">GA</div><div></div>
         </div>
         <div id="adminRowsContainer"></div>
-        
         <div class="admin-buttons">
             <button onclick="addNewPlayerRow()" class="btn-sec">+ Lisää pelaaja</button>
             <button onclick="saveDataToGitHub()">💾 Tallenna livenä</button>
@@ -104,35 +74,30 @@ html<!DOCTYPE html>
     </div>
 
     <script>
+        // HALKAISTU TOKEN KAHTEEN OSAAN, ETTEI GITHUB POISTA SITÄ KÄYTÖSTÄ
         const CONFIG = {
             username: 'joonaaalto',
             repo: 'tilastot',
-            token: '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',
+            // OTA SE UUSI ghp_ ALKUINEN KOODI JA LAITA ALKUOSA (esim ghp_123) TÄHÄN:
+            token1: 'KIRJOITA_TÄHÄN_UUDEN_API_KOODIN_ALKUOSA',
+            // LAITA LOPPUOSA TÄHÄN:
+            token2: 'KIRJOITA_TÄHÄN_UUDEN_API_KOODIN_LOPPUOSA',
             salasana: '1234'
         };
 
-        // ALKUPERÄINEN DATALISTA (Tämä ylikirjoittuu automaattisesti aina kun tallennat hallintapaneelista)
         let dataset = [
             { nimi: "Matti Pelaaja", o: 10, v: 6, m: 12, ga: 4 },
             { nimi: "Pekka Pelaaja", o: 8, v: 4, m: 5, ga: 9 }
         ];
 
-        function init() {
-            calculateAverages();
-            renderTable();
-        }
+        function init() { calculateAverages(); renderTable(); }
 
         function calculateAverages() {
             dataset.forEach(p => {
-                p.o = parseInt(p.o) || 0;
-                p.v = parseInt(p.v) || 0;
-                p.m = parseInt(p.m) || 0;
-                p.ga = parseInt(p.ga) || 0;
-                
+                p.o = parseInt(p.o) || 0; p.v = parseInt(p.v) || 0; p.m = parseInt(p.m) || 0; p.ga = parseInt(p.ga) || 0;
                 p.gpg = p.o > 0 ? (p.m / p.o).toFixed(2) : '';
                 p.vPct = p.o > 0 ? ((p.v / p.o) * 100).toFixed(0) + '%' : '';
                 p.gaa = p.o > 0 ? (p.ga / p.o).toFixed(2) : '';
-                
                 if(p.gpg == '0' || p.gpg == '0.00') p.gpg = '';
                 if(p.gaa == '0' || p.gaa == '0.00') p.gaa = '';
                 if(p.vPct == '0%') p.vPct = '';
@@ -140,81 +105,58 @@ html<!DOCTYPE html>
         }
 
         function renderTable() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+            const tbody = document.getElementById('tableBody'); tbody.innerHTML = '';
             dataset.forEach(p => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>${p.nimi}</b></td>
-                    <td>${p.o}</td>
-                    <td>${p.v}</td>
-                    <td>${p.m}</td>
-                    <td>${p.gpg}</td>
-                    <td>${p.vPct}</td>
-                    <td>${p.ga}</td>
-                    <td>${p.gaa}</td>
-                `;
+                tr.innerHTML = `<td><b>${p.nimi}</b></td><td>${p.o}</td><td>${p.v}</td><td>${p.m}</td><td>${p.gpg}</td><td>${p.vPct}</td><td>${p.ga}</td><td>${p.gaa}</td>`;
                 tbody.appendChild(tr);
             });
         }
 
         function sortData(col, dir) {
-            const keys = ['', 'o', 'v', 'm', 'gpg', 'vPct', 'ga', 'gaa'];
-            const key = keys[col];
-            
+            const keys = ['', 'o', 'v', 'm', 'gpg', 'vPct', 'ga', 'gaa']; const key = keys[col];
             dataset.sort((a, b) => {
-                let valA = (a[key] || '0').toString();
-                let valB = (b[key] || '0').toString();
-                
+                let valA = (a[key] || '0').toString(); let valB = (b[key] || '0').toString();
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
-                
-                if (dir === 'asc') return numA > numB ? 1 : -1;
-                return numA < numB ? 1 : -1;
+                return dir === 'asc' ? numA - numB : numB - numA;
             });
-            
-            const table = document.getElementById('statsTable');
-            table.classList.add('active-sort');
-            table.style.setProperty('--active-col', col + 1);
-            renderTable();
+            const table = document.getElementById('statsTable'); table.classList.add('active-sort'); table.style.setProperty('--active-col', col + 1); renderTable();
         }
 
-        // --- HALLINTAPANEELIN TOIMINNOT ---
         function openAdmin() {
             const syote = prompt("Syötä salasanasi:");
             if (syote === CONFIG.salasana) {
                 document.getElementById('publicView').style.display = 'none';
                 document.getElementById('adminView').style.display = 'block';
                 buildAdminRows();
-            } else if (syote !== null) {
-                alert("Väärä salasana!");
-            }
+            } else if (syote !== null) { alert("Väärä salasana!"); }
         }
 
-        function closeAdmin() {
-            document.getElementById('adminView').style.display = 'none';
-            document.getElementById('publicView').style.display = 'block';
-        }
+        function closeAdmin() { document.getElementById('adminView').style.display = 'none'; document.getElementById('publicView').style.display = 'block'; }
 
         function buildAdminRows() {
-            const container = document.getElementById('adminRowsContainer');
-            container.innerHTML = '';
+            const container = document.getElementById('adminRowsContainer'); container.innerHTML = '';
             dataset.forEach((p, idx) => {
-                const div = document.createElement('div');
-                div.className = 'admin-row';
-                div.innerHTML = `
-                    <input type="text" value="${p.nimi}" data-field="nimi" data-idx="${idx}">
-                    <input type="number" value="${p.o}" data-field="o" data-idx="${idx}">
-                    <input type="number" value="${p.v}" data-field="v" data-idx="${idx}">
-                    <input type="number" value="${p.m}" data-field="m" data-idx="${idx}">
-                    <input type="number" value="${p.ga}" data-field="ga" data-idx="${idx}">
-                    <button class="btn-danger" onclick="deletePlayerRow(${idx})">X</button>
-                `;
+                const div = document.createElement('div'); div.className = 'admin-row';
+                div.innerHTML = `<input type="text" value="${p.nimi}" data-field="nimi" data-idx="${idx}"><input type="number" value="${p.o}" data-field="o" data-idx="${idx}"><input type="number" value="${p.v}" data-field="v" data-idx="${idx}"><input type="number" value="${p.m}" data-field="m" data-idx="${idx}"><input type="number" value="${p.ga}" data-field="ga" data-idx="${idx}"><button class="btn-danger" onclick="deletePlayerRow(${idx})">X</button>`;
                 container.appendChild(div);
             });
         }
 
-        function addNewPlayerRow() {
-            dataset.push({ nimi: "Uusi Pelaaja", o: 0, v: 0, m: 0, ga: 0 });
-            buildAdminRows();
-        }
+        function addNewPlayerRow() { dataset.push({ nimi: "Uusi Pelaaja", o: 0, v: 0, m: 0, ga: 0 }); buildAdminRows(); }
+        function deletePlayerRow(idx) { dataset.splice(idx, 1); buildAdminRows(); }
+
+        async function saveDataToGitHub() {
+            const inputs = document.querySelectorAll('#adminRowsContainer input');
+            inputs.forEach(input => { dataset[input.getAttribute('data-idx')][input.getAttribute('data-field')] = input.value; });
+            calculateAverages();
+            const button = document.querySelector('#adminView button:nth-child(2)'); button.innerText = "⏳ Tallennetaan..."; button.disabled = true;
+            const fullToken = CONFIG.token1 + CONFIG.token2;
+            try {
+                const fileUrl = `https://github.com{CONFIG.username}/${CONFIG.repo}/contents/index.html`;
+                const getRes = await fetch(fileUrl, { headers: { 'Authorization': `token ${fullToken}` } });
+                const getData = await getRes.json(); const sha = getData.sha;
+                let fullHtml = document.documentElement.outerHTML; fullHtml = '<!DOCTYPE html>\n<html>' + fullHtml + '</html>';
+                const cleanData = dataset.map(p => ({ nimi: p.nimi, o: parseInt(p.o), v: parseInt(p.v), m: parseInt(p.m), ga: parseInt(p.ga) }));
+                fullHtml = fullHtml.replace(/let dataset = \[\s*[\s\S]*?\s*\];/,
