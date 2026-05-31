@@ -60,7 +60,8 @@
 
     <script>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        const url = `https://google.com{sheetId}/pub?gid=0&output=csv`;
+        // Käytetään gviz-rajapintaa, joka palauttaa datan varmasti oikeassa muodossa
+        const url = `https://google.com{sheetId}/gviz/tq?tqx=out:csv&gid=0`;
 
         let tableData = [];
 
@@ -70,30 +71,28 @@
                 if (!response.ok) throw new Error('Verkkovirhe');
                 const csvText = await response.text();
                 
+                // Siivotaan suomalaiset rivinvaihdot
                 const cleanText = csvText.replace(/\r/g, '');
                 const lines = cleanText.split('\n');
                 tableData = [];
 
-                for (let i = 0; i < lines.length; i++) {
+                // Käydään rivit läpi, aloitetaan riviltä 2 (i = 1) jotta otsikot ohitetaan
+                for (let i = 1; i < lines.length; i++) {
                     let currentLine = lines[i].trim();
                     if (!currentLine) continue;
                     
+                    // Tunnistetaan sarakkeiden erotin (pilkku tai puolipiste)
                     let separator = currentLine.includes(';') ? ';' : ',';
                     let row = currentLine.split(separator).map(cell => cell.replace(/^"|"$/g, '').trim());
                     
-                    // Ohitetaan otsikkorivi automaattisesti etsimällä sanaa "Pelaaja" tai tyhjiä soluja
-                    if (!row[0] || row[0].toLowerCase() === 'pelaaja' || row[0] === '') {
-                        continue; 
-                    }
-                    
-                    // Varmistetaan, että rivillä on vähintään nimi ja jotain muuta tietoa
-                    if (row && row.length > 1) {
+                    // Otetaan mukaan vain rivit, joissa on pelaajan nimi
+                    if (row && row[0] !== '' && row[0].toLowerCase() !== 'pelaaja') {
                         tableData.push(row);
                     }
                 }
 
                 if (tableData.length === 0) {
-                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt. Varmista, että Sheets-taulukossasi on vähintään yksi pelaajarivi otsikon alla.';
+                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt. Varmista, että Sheets-taulukossa on nimiä sarakkeessa A.';
                     return;
                 }
 
@@ -102,7 +101,7 @@
                 
                 renderTable(tableData);
             } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe ladattaessa tietoja. Varmista, että Sheets on julkaistu verkkoon.';
+                document.getElementById('loading').innerText = 'Virhe ladattaessa tietoja. Varmista, että Sheets-taulukon yleinen jako on asetettu muotoon "Kaikki joilla on linkki".';
                 console.error(error);
             }
         }
@@ -118,10 +117,21 @@
                 const o = row[1] || '0';
                 const v = row[2] || '0';
                 const m = row[3] || '0';
-                const gpg = row[4] || '';
-                const vPct = row[5] || '';
+                
+                // Muotoillaan keskiarvot ja prosentit kauniiksi
+                let gpg = parseFloat((row[4] || '0').replace(',', '.')) || 0;
+                gpg = gpg > 0 ? gpg.toFixed(2) : '0.00';
+                
+                let vPct = row[5] || '0%';
+                if (!vPct.includes('%')) {
+                    let val = parseFloat(vPct.replace(',', '.')) || 0;
+                    vPct = val <= 1 ? (val * 100).toFixed(0) + '%' : val.toFixed(0) + '%';
+                }
+                
                 const ga = row[6] || '0';
-                const gaa = row[7] || '';
+                
+                let gaa = parseFloat((row[7] || '0').replace(',', '.')) || 0;
+                gaa = gaa > 0 ? gaa.toFixed(2) : '0.00';
 
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
