@@ -60,7 +60,8 @@
 
     <script>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        const url = `https://google.com{sheetId}/pub?output=csv`;
+        // Lisätty tarkka välilehden tunnus gid=0 osoitteen perään, jotta haku onnistuu varmasti
+        const url = `https://google.com{sheetId}/pub?gid=0&output=csv`;
 
         let tableData = [];
 
@@ -70,7 +71,9 @@
                 if (!response.ok) throw new Error('Verkkovirhe');
                 const csvText = await response.text();
                 
-                const lines = csvText.split('\n');
+                // Siivotaan suomalaiset rivinvaihdot (\r\n) puhtaiksi rivinvaihdoiksi (\n)
+                const cleanText = csvText.replace(/\r/g, '');
+                const lines = cleanText.split('\n');
                 tableData = [];
 
                 // Aloitetaan riviltä 2 (i = 1), eli ohitetaan otsikot
@@ -82,8 +85,8 @@
                     let separator = currentLine.includes(';') ? ';' : ',';
                     let row = currentLine.split(separator).map(cell => cell.replace(/^"|"$/g, '').trim());
                     
-                    // Varmistetaan että rivillä on nimitieto (sarake A ei ole tyhjä), eikä se ole tyhjä erotinrivi
-                    if (row && row[0] && row[0] !== "" && !row[0].startsWith(',')) {
+                    // Otetaan mukaan vain ne rivit, joissa on pelaajan nimi
+                    if (row && row[0]) {
                         tableData.push(row);
                     }
                 }
