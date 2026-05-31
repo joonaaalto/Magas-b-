@@ -21,12 +21,6 @@ html<!DOCTYPE html>
         /* TÄMÄ ON SE AINOA LISÄTTY RIVI: JOKA TOINEN RIVI ON VAALEANHARMAA */
         tr:nth-child(even) { background-color: #eaedf2; }
         
-        /* TÄMÄ TYYLI LIHAVOI VALITUN PYSTYRIVIN NUMEROT JÄRJESTETTÄESSÄ */
-        .active-sort td:nth-child(var(--active-col)) {
-            font-weight: bold;
-            color: #000;
-        }
-        
         tr:last-child td { border-bottom: none; }
         .loading { text-align: center; padding: 20px; font-weight: bold; color: #666; }
     </style>
@@ -168,12 +162,6 @@ html<!DOCTYPE html>
                     return numA < numB ? 1 : -1;
                 }
             });
-            
-            // KYTKETÄÄN LIHAVOINTI PÄÄLLE VALITULLE SARAKKEELLE
-            const table = document.getElementById('statsTable');
-            table.classList.add('active-sort');
-            table.style.setProperty('--active-col', columnIndex + 1);
-            
             renderTable(tableData);
         }
     </script>
