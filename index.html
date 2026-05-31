@@ -26,7 +26,7 @@
         <button onclick="sortData(1, 'desc')">Ottelut (Isot ensin)</button>
         <button onclick="sortData(1, 'asc')">Ottelut (Pienet ensin)</button>
         <button onclick="sortData(2, 'desc')">Voitot (Isot ensin)</button>
-        <button onclick="sortData(2, 'asc')">Voitot (Pienet ensin)</button>
+        <button onclick="sortData(2, 'asc')">Voit nolla (Pienet ensin)</button>
         <button onclick="sortData(3, 'desc')">Maalit (Isot ensin)</button>
         <button onclick="sortData(3, 'asc')">Maalit (Pienet ensin)</button>
         <button onclick="sortData(4, 'desc')">Paras GPG</button>
@@ -60,51 +60,33 @@
 
     <script>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        // Käytetään gviz-rajapintaa, joka palauttaa datan varmasti oikeassa muodossa
-        const url = `https://google.com{sheetId}/gviz/tq?tqx=out:csv&gid=0`;
-
         let tableData = [];
 
-        async function loadStats() {
+        // Käytetään varmaa JSONP-skriptitekniikkaa, joka ohittaa Googlen lukitukset täysin
+        function koodiMestari(data) {
             try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error('Verkkovirhe');
-                const csvText = await response.text();
-                
-                // Siivotaan suomalaiset rivinvaihdot
-                const cleanText = csvText.replace(/\r/g, '');
-                const lines = cleanText.split('\n');
-                tableData = [];
-
-                // Käydään rivit läpi, aloitetaan riviltä 2 (i = 1) jotta otsikot ohitetaan
-                for (let i = 1; i < lines.length; i++) {
-                    let currentLine = lines[i].trim();
-                    if (!currentLine) continue;
-                    
-                    // Tunnistetaan sarakkeiden erotin (pilkku tai puolipiste)
-                    let separator = currentLine.includes(';') ? ';' : ',';
-                    let row = currentLine.split(separator).map(cell => cell.replace(/^"|"$/g, '').trim());
-                    
-                    // Otetaan mukaan vain rivit, joissa on pelaajan nimi
-                    if (row && row[0] !== '' && row[0].toLowerCase() !== 'pelaaja') {
-                        tableData.push(row);
-                    }
-                }
-
-                if (tableData.length === 0) {
-                    document.getElementById('loading').innerText = 'Pelaajatietoja ei löytynyt. Varmista, että Sheets-taulukossa on nimiä sarakkeessa A.';
-                    return;
-                }
+                const rows = data.table.rows;
+                tableData = rows.map(row => {
+                    return row.c.map(cell => {
+                        if (!cell) return '';
+                        return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
+                    });
+                });
 
                 document.getElementById('loading').style.display = 'none';
                 document.getElementById('statsTable').style.display = 'table';
                 
                 renderTable(tableData);
             } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe ladattaessa tietoja. Varmista, että Sheets-taulukon yleinen jako on asetettu muotoon "Kaikki joilla on linkki".';
+                document.getElementById('loading').innerText = 'Virhe tietojen käsittelyssä.';
                 console.error(error);
             }
         }
+
+        // Ladataan Google Sheets taustalla ilman eston riskiä
+        const script = document.createElement('script');
+        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        document.body.appendChild(script);
 
         function renderTable(data) {
             const tbody = document.getElementById('tableBody');
@@ -118,20 +100,15 @@
                 const v = row[2] || '0';
                 const m = row[3] || '0';
                 
-                // Muotoillaan keskiarvot ja prosentit kauniiksi
-                let gpg = parseFloat((row[4] || '0').replace(',', '.')) || 0;
-                gpg = gpg > 0 ? gpg.toFixed(2) : '0.00';
-                
-                let vPct = row[5] || '0%';
-                if (!vPct.includes('%')) {
-                    let val = parseFloat(vPct.replace(',', '.')) || 0;
-                    vPct = val <= 1 ? (val * 100).toFixed(0) + '%' : val.toFixed(0) + '%';
-                }
-                
+                let gpg = row[4] || '';
+                let vPct = row[5] || '';
                 const ga = row[6] || '0';
-                
-                let gaa = parseFloat((row[7] || '0').replace(',', '.')) || 0;
-                gaa = gaa > 0 ? gaa.toFixed(2) : '0.00';
+                let gaa = row[7] || '';
+
+                // Siistitään mahdolliset raa'at nollat pois näkyvistä
+                if (gpg == '0' || gpg == '0.00') gpg = '';
+                if (gaa == '0' || gaa == '0.00') gaa = '';
+                if (vPct == '0' || vPct == '0%') vPct = '';
 
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
@@ -149,8 +126,8 @@
 
         function sortData(columnIndex, direction) {
             tableData.sort((a, b) => {
-                let valA = a[columnIndex] || '0';
-                let valB = b[columnIndex] || '0';
+                let valA = (a[columnIndex] || '0').toString();
+                let valB = b[columnIndex] || '0').toString();
 
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
@@ -163,8 +140,6 @@
             });
             renderTable(tableData);
         }
-
-        window.onload = loadStats;
     </script>
 </body>
 </html>
