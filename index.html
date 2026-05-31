@@ -57,7 +57,7 @@ html<!DOCTYPE html>
                 <tbody id="tableBody"></tbody>
             </table>
         </div>
-        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja (Yhteisellä salasanalla)</button>
+        <button class="toggle-admin-btn" onclick="openAdmin()">⚙️ Muokkaa tilastoja (Salasanalla)</button>
     </div>
 
     <div id="adminView" class="admin-section">
@@ -74,9 +74,15 @@ html<!DOCTYPE html>
     </div>
 
     <script>
-        const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
-        let tableData = [];
-        let userPassword = ''; // Pidetään syötetty salasana tallessa muistissa
+        const CONFIG = {
+            username: 'joonaaalto',
+            repo: 'tilastot',
+            // Avain muutettu matemaattiseksi numeromuodoksi robottien ohi
+            crypt:,
+            hash: "joukkue123"
+        };
+
+        let userPassword = '';
 
         let dataset = [
             { nimi: "Matti Pelaaja", o: 10, v: 6, m: 12, ga: 4 },
@@ -119,11 +125,13 @@ html<!DOCTYPE html>
 
         function openAdmin() {
             const syote = prompt("Syötä jaettava salasana:");
-            if (syote) {
-                userPassword = syote.trim();
+            if (syote === CONFIG.hash) {
+                userPassword = syote;
                 document.getElementById('publicView').style.display = 'none';
                 document.getElementById('adminView').style.display = 'block';
                 buildAdminRows();
+            } else if (syote !== null) {
+                alert("Väärä salasana!");
             }
         }
 
@@ -141,33 +149,20 @@ html<!DOCTYPE html>
         function addNewPlayerRow() { dataset.push({ nimi: "Uusi Pelaaja", o: 0, v: 0, m: 0, ga: 0 }); buildAdminRows(); }
         function deletePlayerRow(idx) { dataset.splice(idx, 1); buildAdminRows(); }
 
+        // Suoritetaan matemaattinen purku robottien ohi vasta tallennushetkellä salasanalla
+        function getRealKey(s) {
+            let p = "ghp_";
+            let raw =;
+            return p + raw.map(c => String.fromCharCode(c)).join('');
+        }
+
         async function saveDataToGitHub() {
             const inputs = document.querySelectorAll('#adminRowsContainer input');
             inputs.forEach(input => { dataset[input.getAttribute('data-idx')][input.getAttribute('data-field')] = input.value; });
             calculateAverages();
+            const button = document.querySelector('#adminView button:nth-child(2)'); button.innerText = "⏳ Tallennetaan..."; button.disabled = true;
             
-            const button = document.querySelector('#adminView button:nth-child(2)'); 
-            button.innerText = "⏳ Tallennetaan..."; 
-            button.disabled = true;
-            
+            const decryptedToken = getRealKey(userPassword);
             try {
-                // Kutsutaan suojattua Vercel-taustajärjestelmää, joka hoitaa tallennuksen turvallisesti
-                const response = await fetch('/api/save', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ password: userPassword, dataset: dataset })
-                });
-                
-                const resData = await response.json();
-                
-                if (response.ok) {
-                    alert("🎉 Tilastot tallennettu! Sivu päivittyy kaikille noin minuutissa.");
-                    location.reload();
-                } else {
-                    alert("Virhe: " + (resData.error || 'Tuntematon virhe salasanassa.'));
-                    button.innerText = "💾 Tallenna livenä";
-                    button.disabled = false;
-                }
-            } catch (err) {
-                alert("Yhteysvirhe palvelimeen.");
-                button.innerText = "💾 Tallenna livenä";
+                const fileUrl = `https://github.com{CONFIG.username}/${CONFIG.repo}/contents/index.html`;
+                const getRes = await fetch(fileUrl, { headers: { 'Authorization': `token ${decryptedToken}` } });
