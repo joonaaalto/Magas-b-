@@ -10,8 +10,6 @@ html<!DOCTYPE html>
         .button-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 15px; }
         button { background-color: #007bff; color: white; border: none; padding: 12px 8px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         button:active { background-color: #0056b3; }
-        .full-width { grid-column: span 2; background-color: #dc3545; }
-        .full-width:active { background-color: #bd2130; }
         .table-container { background: white; border-radius: 10px; overflow-x: auto; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
         th, td { padding: 10px 12px; border-bottom: 1px solid #eeeeee; white-space: nowrap; }
@@ -35,7 +33,10 @@ html<!DOCTYPE html>
         <button onclick="sortData(4, 'asc')">Pienin GPG</button>
         <button onclick="sortData(5, 'desc')">Paras Voitto%</button>
         <button onclick="sortData(5, 'asc')">Pienin Voitto%</button>
-        <button onclick="sortData(6, 'desc')" class="full-width">Päästetyt maalit</button>
+        <button onclick="sortData(6, 'desc')">Eniten GA</button>
+        <button onclick="sortData(6, 'asc')">Vähiten GA</button>
+        <button onclick="sortData(7, 'desc')">Suurin GAA</button>
+        <button onclick="sortData(7, 'asc')">Pienin GAA</button>
     </div>
 
     <div class="table-container">
@@ -61,26 +62,26 @@ html<!DOCTYPE html>
         const sheetId = '11GpJty25_ftRoKPs_ZukZokeomk0y2UY0R2GHpeJ8Mc';
         let tableData = [];
 
-        // Luetaan Google Sheetsin tarjoama JSONP-datavirta turvallisesti
+        // Luetaan Google Sheetsin tarjoama JSONP-datavirta
         function koodiMestari(data) {
             try {
                 if (!data || !data.table || !data.table.rows) {
-                    document.getElementById('loading').innerText = 'Virhe tiedon hakemisessa.';
+                    document.getElementById('loading').innerText = 'Virhe tiedon rakenteessa. Varmista taulukko.';
                     return;
                 }
 
                 const rows = data.table.rows;
                 
-                // Puretaan Googlen rakenne taulukkomuotoon ja siivotaan mahdolliset tyhjät solut
+                // Muunnetaan Googlen JSON-rakenne puhtaaksi taulukoksi
                 let rawData = rows.map(row => {
                     if (!row || !row.c) return [];
                     return row.c.map(cell => {
-                        if (!cell || cell.v === null || cell.v === undefined) return '';
-                        return cell.f ? cell.f : cell.v;
+                        if (!cell) return '';
+                        return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
                     });
                 }).filter(row => row.length > 0);
 
-                // Ohitetaan mahdollinen otsikkorivi automaattisesti
+                // Ohitetaan mahdollinen otsikkorivi
                 if (rawData.length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
                     rawData.shift();
                 }
@@ -97,14 +98,14 @@ html<!DOCTYPE html>
                 
                 renderTable(tableData);
             } catch (error) {
-                document.getElementById('loading').innerText = 'Virhe tietojen käsittelyssä.';
+                document.getElementById('loading').innerText = 'Virhe tietojen tulkinnassa.';
                 console.error(error);
             }
         }
 
-        // Tehdään dynaaminen haku JSONP-tekniikalla, joka kiertää selainten CORS-lukitukset poikkeuksetta
+        // Luodaan dynaaminen skriptikutsu joka ohittaa CORS-suojaukset
         const script = document.createElement('script');
-        script.src = `https://google.com{sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
+        script.src = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=responseHandler:koodiMestari&gid=0`;
         document.body.appendChild(script);
 
         function renderTable(data) {
@@ -114,20 +115,19 @@ html<!DOCTYPE html>
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                // Varmistetaan sarakkeiden turvallinen poiminta (A-H) ilman kaatumisriskiä
-                let name = row[0] !== undefined && row[0] !== null ? row[0] : '';
-                let o = row[1] !== undefined && row[1] !== null ? row[1] : '0';
-                let v = row[2] !== undefined && row[2] !== null ? row[2] : '0';
-                let m = row[3] !== undefined && row[3] !== null ? row[3] : '0';
-                let gpg = row[4] !== undefined && row[4] !== null ? row[4] : '';
-                let vPct = row[5] !== undefined && row[5] !== null ? row[5] : '';
-                let ga = row[6] !== undefined && row[6] !== null ? row[6] : '0';
-                let gaa = row[7] !== undefined && row[7] !== null ? row[7] : '';
+                const name = row[0] || '';
+                const o = row[1] || '0';
+                const v = row[2] || '0';
+                const m = row[3] || '0';
+                let gpg = row[4] || '';
+                let vPct = row[5] || '';
+                const ga = row[6] || '0';
+                let gaa = row[7] || '';
 
-                // Siivotaan Excel-laskuvirheet tai raa'at nollat piiloon, jos ne sotkevat taulukkoa
-                if (gpg == '0' || gpg == '0.00' || gpg.toString().includes('#')) gpg = '';
-                if (gaa == '0' || gaa == '0.00' || gaa.toString().includes('#')) gaa = '';
-                if (vPct == '0' || vPct == '0%' || vPct.toString().includes('#')) vPct = '';
+                // Piilotetaan tyhjät tai nollakeskiarvot näkyvistä
+                if (gpg == '0' || gpg == '0.00') gpg = '';
+                if (gaa == '0' || gaa == '0.00') gaa = '';
+                if (vPct == '0' || vPct == '0%') vPct = '';
 
                 tr.innerHTML = `
                     <td><b>${name}</b></td>
@@ -145,10 +145,9 @@ html<!DOCTYPE html>
 
         function sortData(columnIndex, direction) {
             tableData.sort((a, b) => {
-                let valA = a[columnIndex] !== undefined && a[columnIndex] !== null ? a[columnIndex].toString() : '0';
-                let valB = b[columnIndex] !== undefined && b[columnIndex] !== null ? b[columnIndex].toString() : '0';
+                let valA = (a[columnIndex] || '0').toString();
+                let valB = (b[columnIndex] || '0').toString();
 
-                // Siivotaan suomalaiset pilkkudesimaalit ja prosenttimerkit puhtaiksi numeroiksi
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
 
