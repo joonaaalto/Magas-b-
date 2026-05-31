@@ -73,12 +73,12 @@ html<!DOCTYPE html>
                 let rawData = rows.map(row => {
                     if (!row || !row.c) return [];
                     return row.c.map(cell => {
-                        if (!cell) return '';
-                        return cell.f ? cell.f : (cell.v !== null ? cell.v : '');
+                        if (!cell || cell.v === null) return '';
+                        return cell.f ? cell.f : cell.v;
                     });
                 }).filter(row => row.length > 0);
 
-                if (rawData.length > 0 && rawData[0].toString().toLowerCase().includes('pelaaja')) {
+                if (rawData.length > 0 && rawData[0].length > 0 && rawData[0][0].toString().toLowerCase().includes('pelaaja')) {
                     rawData.shift();
                 }
 
@@ -110,14 +110,14 @@ html<!DOCTYPE html>
             data.forEach(row => {
                 const tr = document.createElement('tr');
                 
-                const name = row[0] || '';
-                const o = row[1] || '0';
-                const v = row[2] || '0';
-                const m = row[3] || '0';
-                let gpg = row[4] || '';
-                let vPct = row[5] || '';
-                const ga = row[6] || '0';
-                let gaa = row[7] || '';
+                let name = row[0] !== undefined ? row[0] : '';
+                let o = row[1] !== undefined ? row[1] : '0';
+                let v = row[2] !== undefined ? row[2] : '0';
+                let m = row[3] !== undefined ? row[3] : '0';
+                let gpg = row[4] !== undefined ? row[4] : '';
+                let vPct = row[5] !== undefined ? row[5] : '';
+                let ga = row[6] !== undefined ? row[6] : '0';
+                let gaa = row[7] !== undefined ? row[7] : '';
 
                 if (gpg == '0' || gpg == '0.00') gpg = '';
                 if (gaa == '0' || gaa == '0.00') gaa = '';
@@ -139,8 +139,8 @@ html<!DOCTYPE html>
 
         function sortData(columnIndex, direction) {
             tableData.sort((a, b) => {
-                let valA = (a[columnIndex] || '0').toString();
-                let valB = (b[columnIndex] || '0').toString();
+                let valA = a[columnIndex] !== undefined ? a[columnIndex].toString() : '0';
+                let valB = b[columnIndex] !== undefined ? b[columnIndex].toString() : '0';
 
                 let numA = parseFloat(valA.replace(',', '.').replace('%', '')) || 0;
                 let numB = parseFloat(valB.replace(',', '.').replace('%', '')) || 0;
